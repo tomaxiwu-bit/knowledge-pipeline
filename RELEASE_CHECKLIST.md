@@ -22,6 +22,9 @@ On every supported operating system, confirm this complete path with real self-h
 4. Save the current judgment and next action, then export the Markdown brief.
 5. Export a local backup, verify its JSON contains no API key/token/password, then restore it in a clean profile.
 6. Disable one backend briefly and confirm cached reads are timestamped as offline data rather than shown as live results.
+7. Start the intelligence service with the configured local Ollama models. Sync at least three RSS/bookmark/memo materials, ask a question that has a verifiable answer, and open every returned evidence card.
+8. Stop Ollama while leaving FastAPI running. Confirm that indexing/search reports the semantic limitation and that Question & Answer switches to evidence retrieval rather than inventing a generated answer.
+9. Record the real functional demo from `docs/DEMO_SCRIPT.md`; scrub credentials and private content before publishing it.
 
 ## Signing and distribution
 
@@ -35,3 +38,4 @@ On every supported operating system, confirm this complete path with real self-h
 - That credentials are stored locally and excluded from backup exports.
 - Which self-hosted services and API versions were manually tested.
 - Any known limits, including the seven-day read-only cache boundary.
+- The local RAG models tested, whether cross-encoder reranking was enabled, and the fact that the intelligence endpoint is loopback-only by default.

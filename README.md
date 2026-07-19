@@ -1,13 +1,16 @@
 <p align="center">
   <img src="docs/logo.svg" alt="知识流水线" width="120" /><br/>
   <strong>知识流水线 Knowledge Pipeline</strong><br/>
-  <em>个人知识管理的统一桌面客户端</em>
+  <em>本地优先的全栈个人知识工作台</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Electron-30-47848F?logo=electron" alt="Electron" />
+  <img src="https://img.shields.io/badge/Electron-43-47848F?logo=electron" alt="Electron" />
   <img src="https://img.shields.io/badge/Vue_3-4FC08D?logo=vue.js" alt="Vue 3" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/SQLite-FTS5-003B57?logo=sqlite" alt="SQLite FTS5" />
+  <img src="https://img.shields.io/badge/Chroma-Hybrid_RAG-7C3AED" alt="Chroma Hybrid RAG" />
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License" />
 </p>
 
@@ -15,14 +18,18 @@
 
 ## 这是什么
 
-**知识流水线** 是一款开源桌面应用，将日常知识管理的四个自然环节整合到一个界面：
+**知识流水线** 是一款本地优先的全栈知识工作台。它把日常知识管理的四个自然环节，以及一个可追溯的本地问答层，整合到一个界面：
 
 ```
 RSS 发现 → 链接收藏 → 速记笔记 → Markdown 写作
    ①            ②            ③             ④
+                                  ↓
+                     SQLite FTS5 + Chroma → 有来源的知识问答
 ```
 
 每个环节都有优秀的开源项目（FreshRSS、Karakeep、Memos……），但它们彼此独立，用户要在多个网页间切换、手动复制粘贴。知识流水线通过**插件化适配层**连接你自建的后端，一个界面跑完整条流水线。你的数据始终留在自己的服务器上，不被任何第三方锁定。
+
+它的差异不在于再造一个笔记库：**探究线**保存“证据如何改变判断”的过程；**知识问答**只从你已同步的材料中取证，并把回答中的每一条结论连回原始条目。
 
 ## 核心特性
 
@@ -55,6 +62,13 @@ RSS 发现 → 链接收藏 → 速记笔记 → Markdown 写作
 - **知识图谱** — 力导向图可视化所有条目及其关系网络，节点按类型着色，双击跳转
 - **层级标签系统** — 从收藏和笔记聚合标签，支持 `/` 分隔的层级标签树
 
+### 本地知识问答（RAG）
+
+- **全栈本地服务** — FastAPI 提供受版本化 API，SQLite 保存规范化文档和 FTS5 全文索引，Chroma 保存本地持久化向量
+- **混合检索 + 重排** — 把 FTS5 关键词结果与向量近邻以 Reciprocal Rank Fusion 融合；内置轻量词法重排，可选本地 Cross-Encoder 重排
+- **可追溯作答** — 每个回答都返回编号证据卡、片段摘要和原始条目入口；本地对话模型不可用时明确降级为“证据检索”而非虚构答案
+- **受控同步** — 可从已连接的 RSS、收藏、速记批量建立索引，也可以从阅读页单篇入库；凭据仍只停留在 Electron 主进程
+
 ### 效率与安全
 
 - **连接健康检查** — 设置页可一次测试全部已配置服务，并保留每个实例的状态与诊断结果
@@ -64,6 +78,7 @@ RSS 发现 → 链接收藏 → 速记笔记 → Markdown 写作
 - **亮/暗主题** — 一键切换，记忆选择
 - **键盘快捷键** — 高频操作全覆盖
 - **AI 摘要** — 支持 OpenAI 兼容接口与本地 Ollama
+- **本地优先部署** — `docker compose` 可单独运行智能服务；数据库和向量索引映射到本机 `data/` 目录
 
 <!-- 截图占位
 ## 截图
@@ -78,6 +93,7 @@ RSS 发现 → 链接收藏 → 速记笔记 → Markdown 写作
 ### 前置条件
 
 - Node.js >= 20.19
+- Docker Desktop（推荐，用于本地知识问答服务）或 Python 3.12+
 - 一个或多个已实现的自建后端（至少配一个才有内容可看）：
   - RSS：[FreshRSS](https://www.freshrss.com/)
   - 收藏：[Karakeep](https://github.com/karakeep-app/karakeep)
@@ -109,6 +125,33 @@ npm run electron:build
 > npm install
 > ```
 
+### 启动本地知识问答服务
+
+知识问答不需要把材料发到第三方。默认使用本机 [Ollama](https://ollama.com/) 做嵌入和作答，FastAPI、SQLite 与 Chroma 可用 Docker 一起启动：
+
+```bash
+# 1. 准备本地模型（首次下载）
+ollama pull nomic-embed-text
+ollama pull qwen3:4b
+
+# 2. 配置并启动智能服务
+cp server/.env.example server/.env
+docker compose up --build
+```
+
+随后打开桌面应用：**设置 → 本地知识问答服务 → 测试服务**，确认连接后进入左侧 **知识问答**，点击「同步已连接来源」。也可以在任一阅读页用「🧠 加入知识库」单篇建立索引。
+
+不使用 Docker 时，可直接运行：
+
+```bash
+python -m venv server/.venv
+source server/.venv/bin/activate  # Windows: server\.venv\Scripts\activate
+pip install -r server/requirements.txt
+uvicorn app.main:app --app-dir server --host 127.0.0.1 --port 8787
+```
+
+> Linux Docker 用户通常可使用随附的 `host-gateway` 映射访问宿主机 Ollama；如环境不支持，请把 `OLLAMA_BASE_URL` 改成宿主机可达地址，或直接在主机运行 FastAPI。若 Ollama/嵌入模型暂不可用，SQLite FTS5 仍可索引和检索材料，但不会生成向量。
+
 ### 配置后端
 
 1. 打开应用 → 左下角 **设置**
@@ -118,7 +161,7 @@ npm run electron:build
 
 ### 迁移与备份
 
-设置页的「数据迁移与备份」可导出关系、智能集合、自定义模板、探究线和服务地址。备份**不会**包含 API Key、Token 或密码；恢复到新设备后，请在设置中重新填写凭据并测试连接。发布前的完整验收步骤见 [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)。
+设置页的「数据迁移与备份」可导出关系、智能集合、自定义模板、探究线和服务地址。备份**不会**包含 API Key、Token、密码或 RAG 索引数据；索引数据始终位于本地 `data/` 卷，可按基础设施策略单独备份。恢复到新设备后，请在设置中重新填写凭据并测试连接。发布前的完整验收步骤见 [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)。
 
 ### AI 摘要配置
 
@@ -127,6 +170,10 @@ npm run electron:build
 | OpenAI 官方 | `https://api.openai.com` | `gpt-4o-mini` | 你的 API Key |
 | OpenAI 兼容服务 | 支持 `/v1/chat/completions` 的服务地址 | 按服务商文档填写 | 服务 API Key |
 | 本地 Ollama | `http://localhost:11434` | `qwen2.5:7b` | 任意值（Ollama 忽略） |
+
+### 演示视频
+
+仓库内包含一份可直接录制的 [2–3 分钟演示脚本](docs/DEMO_SCRIPT.md)：从启动服务、同步材料、基于证据提问，到回到探究线形成判断。发布前按脚本录屏，并把公开视频或 MP4 链接替换到这里；不要把无真实功能演示的占位视频当作发布材料。
 
 ## 架构设计
 
@@ -212,6 +259,16 @@ src/
     ├── karakeep.ts    # Karakeep 适配器
     ├── memos.ts       # Memos 适配器
     └── ai.ts          # AI 摘要适配器（OpenAI 兼容）
+server/
+├── app/
+│   ├── main.py         # FastAPI 路由与健康检查
+│   ├── storage.py      # SQLite 文档库 + FTS5
+│   ├── vector.py       # Chroma 持久化向量适配器
+│   ├── retrieval.py    # RRF 混合检索 + 可选本地重排
+│   └── service.py      # 入库、检索与有来源作答
+├── tests/              # 纯逻辑检索/分块测试
+└── Dockerfile
+data/                   # 运行时 SQLite + Chroma 数据（默认忽略，不入库）
 ```
 
 ### 技术栈
@@ -220,9 +277,10 @@ src/
 |------|------|------|
 | 框架 | Electron 30 + Vue 3 + TypeScript | 跨平台桌面 + 响应式 UI |
 | 状态 | Pinia + Vue Router | 全局状态 + SPA 路由 |
-| 构建 | Vite + vue-tsc + electron-builder | HMR 开发 + 类型安全 + 打包分发 |
 | 渲染 | marked + KaTeX + Mermaid + DOMPurify | Markdown + 数学 + 图表 + 安全 |
-| 存储 | electron-store | 本地 JSON 持久化 |
+| 工作流设置 | electron-store + OS 安全存储 | 主题、服务元数据；凭据不离开主进程 |
+| 知识库 | FastAPI + SQLite FTS5 + Chroma | 正文块、关键词检索、持久化向量 |
+| 本地模型 | Ollama | 嵌入、基于检索证据的作答 |
 
 ## 键盘快捷键
 
@@ -244,6 +302,8 @@ src/
 - **链接安全**：`setWindowOpenHandler` 和 `will-navigate` 只放行 `http/https` 外部链接，拦截 `file://`、`javascript:` 等危险协议
 - **导航拦截**：`will-navigate` 阻止应用内跳转到外部域名，自动转交系统浏览器
 - **启动安全**：窗口 `show: false` + `ready-to-show` + 5 秒超时兜底
+- **RAG 边界**：桌面端只允许连接 `127.0.0.1` / `localhost` 本地智能服务；所有 RAG 请求由主进程验证字段、限时并代理
+- **答案边界**：没有可用本地对话模型时返回检索证据，不把摘要式猜测伪装成已验证答案
 
 ## 灵感来源
 
@@ -286,6 +346,12 @@ src/
 
 它的目标不是取代任何一个后端，而是把它们之间通常丢失的**判断过程**保留在用户自己的桌面端。
 
+### 0.3.0：从“收集”到“可验证地问答”
+
+这一版吸收了本地优先知识工具对数据主权的坚持，也参考了现代 RAG 系统“检索、重排、引用”的可靠性边界，但没有把知识问答做成脱离工作流的聊天框。
+
+知识流水线的独有闭环是：**材料同步 → 证据检索 → 有来源回答 → 回到阅读/探究线形成判断**。它用 SQLite 保存可审计的文本事实，用 Chroma 做语义召回，用 RRF 和本地重排减少单一检索器的盲区；如果模型不在，用户仍能看到原始证据而不是被一个看似流畅的回答误导。
+
 ## 反馈与贡献
 
 - **Bug 反馈 / 功能建议**：请提交 [GitHub Issue](https://github.com/tomaxiwu-bit/knowledge-pipeline/issues)，选择对应标签（`bug` / `feature` / `question`）
@@ -295,12 +361,12 @@ src/
 ## 路线图
 
 - [x] 7 天只读离线回退缓存（RSS、收藏、速记；明确标记缓存来源）
-- [ ] 本地数据缓存（SQLite / IndexedDB）实现真正的离线可用与完整备份
+- [ ] 工作流本地数据缓存（SQLite / IndexedDB）实现真正的离线可用与完整备份
+- [x] SQLite FTS5 + Chroma 的本地混合检索和有来源知识问答
 - [ ] 探究线的本地全文检索、可选标签和按主题的时间线
 - [ ] 探究线的“证据缺口”提示（只提出问题，不替用户下结论）
 - [ ] 浏览器扩展快速捕获（右键发送到知识流水线）
 - [ ] 虚拟滚动（大量 RSS/笔记列表性能优化）
-- [ ] 本地全文搜索引擎（FTS5）
 - [ ] 编辑器图片粘贴与附件支持
 - [ ] 定时任务与自动化规则
 - [ ] 数据导入/导出完整备份
