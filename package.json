@@ -25,7 +25,8 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run test && npm run build",
+    "test:backend": "cd server && python -m compileall -q app tests && python -m unittest discover -s tests -v",
+    "verify": "npm run typecheck && npm run test && npm run test:backend && npm run build",
     "release:check": "npm run verify && npm audit --audit-level=high"
   },
   "dependencies": {

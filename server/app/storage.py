@@ -105,15 +105,16 @@ class KnowledgeStore:
         with self._connect() as connection:
             connection.execute('DELETE FROM chunks_fts WHERE document_id = ?', (document_id,))
             connection.execute('DELETE FROM chunks WHERE document_id = ?', (document_id,))
+            document = connection.execute('SELECT title FROM documents WHERE id = ?', (document_id,)).fetchone()
+            title = document['title'] if document else ''
             for ordinal, (chunk_id, content) in enumerate(zip(chunk_ids, chunks, strict=True)):
                 connection.execute(
                     'INSERT INTO chunks (id, document_id, ordinal, content, created_at) VALUES (?, ?, ?, ?, ?)',
                     (chunk_id, document_id, ordinal, content, now),
                 )
-                document = connection.execute('SELECT title FROM documents WHERE id = ?', (document_id,)).fetchone()
                 connection.execute(
                     'INSERT INTO chunks_fts (chunk_id, document_id, title, content) VALUES (?, ?, ?, ?)',
-                    (chunk_id, document_id, document['title'] if document else '', content),
+                    (chunk_id, document_id, self._fts_index_text(title), self._fts_index_text(content)),
                 )
         return chunk_ids
 
@@ -173,8 +174,18 @@ class KnowledgeStore:
 
     @staticmethod
     def _fts_query(query: str) -> str:
-        terms = re.findall(r'[\w\u4e00-\u9fff]+', query, flags=re.UNICODE)[:16]
+        # unicode61 treats adjacent Han characters as one token.  Append an
+        # explicitly spaced copy at index time and query individual characters
+        # so keyword fallback remains useful for Chinese material without an
+        # external segmenter.
+        terms = re.findall(r'[A-Za-z0-9_]+', query) + re.findall(r'[\u4e00-\u9fff]', query)
+        terms = terms[:16]
         return ' OR '.join(f'"{term.replace(chr(34), "")}"*' for term in terms if term)
+
+    @staticmethod
+    def _fts_index_text(value: str) -> str:
+        cjk_characters = re.findall(r'[\u4e00-\u9fff]', value)
+        return f'{value}\n{" ".join(cjk_characters)}' if cjk_characters else value
 
     @staticmethod
     def _row_to_chunk(row: sqlite3.Row) -> StoredChunk:
