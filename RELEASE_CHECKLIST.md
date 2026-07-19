@@ -6,6 +6,7 @@ Run this before creating a release tag:
 
 ```bash
 npm ci
+cd server && uv lock --check && uv sync --locked --group test && cd ..
 npm run release:check
 npm run electron:build
 ```

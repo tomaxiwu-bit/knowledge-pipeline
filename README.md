@@ -146,11 +146,12 @@ docker compose up --build
 ```bash
 python -m venv server/.venv
 source server/.venv/bin/activate  # Windows: server\.venv\Scripts\activate
-pip install -r server/requirements.txt
-uvicorn app.main:app --app-dir server --host 127.0.0.1 --port 8787
+cd server
+uv sync --locked --group test
+uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8787
 ```
 
-> Linux Docker 用户通常可使用随附的 `host-gateway` 映射访问宿主机 Ollama；如环境不支持，请把 `OLLAMA_BASE_URL` 改成宿主机可达地址，或直接在主机运行 FastAPI。若 Ollama/嵌入模型暂不可用，SQLite FTS5 仍可索引和检索材料，但不会生成向量。
+> `server/uv.lock` 是受版本控制的完整依赖图；`requirements*.txt` 由它导出，供 Docker 和不使用 uv 的环境使用。Linux Docker 用户通常可使用随附的 `host-gateway` 映射访问宿主机 Ollama；如环境不支持，请把 `OLLAMA_BASE_URL` 改成宿主机可达地址，或直接在主机运行 FastAPI。若 Ollama/嵌入模型暂不可用，SQLite FTS5 仍可索引和检索材料，但不会生成向量。要启用本地 Cross-Encoder 重排，请运行 `uv sync --locked --group rerank`，然后设置 `RERANKER_MODE=cross_encoder`。
 
 ### 配置后端
 
@@ -174,6 +175,12 @@ uvicorn app.main:app --app-dir server --host 127.0.0.1 --port 8787
 ### 演示视频
 
 仓库内包含一份可直接录制的 [2–3 分钟演示脚本](docs/DEMO_SCRIPT.md)：从启动服务、同步材料、基于证据提问，到回到探究线形成判断。发布前按脚本录屏，并把公开视频或 MP4 链接替换到这里；不要把无真实功能演示的占位视频当作发布材料。
+
+### 质量门槛（v0.3.1）
+
+- 后端使用锁定的 `uv.lock`；CI 先执行 `uv lock --check` 和 `uv sync --locked --group test`，不会在构建时重新解析依赖版本。
+- 后端测试覆盖服务编排、五个 HTTP 端点、SQLite/FTS 边界、Ollama/Chroma 适配器和配置失败路径；分支覆盖率低于 **85%** 时 CI 失败。
+- 桌面端测试覆盖 RAG IPC 主进程校验和渲染进程客户端契约，确保 UI 只能使用固定的、本机回环 API 操作。
 
 ## 架构设计
 
@@ -303,6 +310,8 @@ data/                   # 运行时 SQLite + Chroma 数据（默认忽略，不�
 - **导航拦截**：`will-navigate` 阻止应用内跳转到外部域名，自动转交系统浏览器
 - **启动安全**：窗口 `show: false` + `ready-to-show` + 5 秒超时兜底
 - **RAG 边界**：桌面端只允许连接 `127.0.0.1` / `localhost` 本地智能服务；所有 RAG 请求由主进程验证字段、限时并代理
+- **FTS 边界**：用户查询先被拆成长度受限的允许词元，再由服务器拼接固定的 FTS5 语法并以参数绑定传入 SQLite；不会将原始 MATCH 语法交给 FTS5 解析
+- **配置边界**：`.env` 中的未知键会令服务启动失败，防止拼写错误静默回退到默认模型、目录或地址
 - **答案边界**：没有可用本地对话模型时返回检索证据，不把摘要式猜测伪装成已验证答案
 
 ## 灵感来源
