@@ -6,6 +6,7 @@ import { useSettingsStore } from '@/renderer/stores/settings'
 import { useRelationStore } from '@/renderer/stores/relations'
 import { useInquiryThreadStore } from '@/renderer/stores/inquiryThreads'
 import { renderMarkdown, renderAsyncContent } from '@/lib/markdown'
+import { knowledgeClient } from '@/renderer/services/ragClient'
 import { exportAsMarkdown, exportAsHTML } from '@/lib/export'
 import ArticleOutline from '@/renderer/components/ArticleOutline.vue'
 import BacklinkPanel from '@/renderer/components/BacklinkPanel.vue'
@@ -292,7 +293,7 @@ async function addToKnowledge() {
   }
   indexing.value = true
   try {
-    const result = await window.kpAPI.rag.invoke('index', {
+    const result = await knowledgeClient.index({
       source_type: props.source === 'rss' ? 'rss' : 'bookmark',
       source_id: decodeURIComponent(props.id),
       title: title.value,

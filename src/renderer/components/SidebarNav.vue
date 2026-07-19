@@ -54,7 +54,7 @@ const navItems = [
         <span class="theme-icon">{{ settingsStore.theme === 'dark' ? '☀️' : '🌙' }}</span>
         <span class="theme-label">{{ settingsStore.theme === 'dark' ? '亮色' : '暗色' }}</span>
       </button>
-      <span class="version">v0.3.0</span>
+      <span class="version">v0.3.1</span>
     </div>
   </nav>
 </template>

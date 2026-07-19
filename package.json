@@ -1,6 +1,6 @@
 {
   "name": "knowledge-pipeline",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "个人知识流水线 - 统一客户端，串联 RSS 发现、链接收藏、速记笔记、Markdown 写作",
   "main": "dist-electron/main/index.js",
   "author": "knowledge-pipeline",
@@ -25,7 +25,7 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:backend": "cd server && python -m compileall -q app tests && python -m unittest discover -s tests -v",
+    "test:backend": "cd server && uv run --locked --group test python -m pytest",
     "verify": "npm run typecheck && npm run test && npm run test:backend && npm run build",
     "release:check": "npm run verify && npm audit --audit-level=high"
   },

@@ -2,42 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/renderer/stores/settings'
+import { knowledgeClient, type KnowledgeAnswer, type KnowledgeCitation, type KnowledgeDocument, type KnowledgeHealth, type KnowledgeSourceType } from '@/renderer/services/ragClient'
 import type { BookmarkClient, MemoClient, RSSClient } from '@/services/types'
-
-type SourceType = 'rss' | 'bookmark' | 'memo' | 'markdown' | 'manual'
-
-interface Citation {
-  index: number
-  chunk_id: string
-  document_id: string
-  source_type: SourceType
-  source_id: string
-  title: string
-  url?: string | null
-  excerpt: string
-  score: number
-}
-
-interface AskResponse {
-  query: string
-  answer: string
-  citations: Citation[]
-  mode: 'grounded_generation' | 'retrieval_only'
-  retrieval: { keyword_candidates: number; vector_candidates: number; reranker: string }
-}
-
-interface HealthResponse {
-  status: string
-  storage: { documents: number; chunks: number }
-  vectors: number
-  reranker_mode: string
-}
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const question = ref('')
-const response = ref<AskResponse | null>(null)
-const health = ref<HealthResponse | null>(null)
+const response = ref<KnowledgeAnswer | null>(null)
+const health = ref<KnowledgeHealth | null>(null)
 const statusMessage = ref('正在检查本地知识服务…')
 const asking = ref(false)
 const syncing = ref(false)
@@ -52,7 +24,7 @@ function getClient<T>(kind: 'rss' | 'bookmark' | 'memo'): T | null {
 
 async function refreshHealth() {
   try {
-    health.value = await window.kpAPI.rag.invoke('health') as HealthResponse
+    health.value = await knowledgeClient.health()
     statusMessage.value = `本地服务就绪：${health.value.storage.documents} 篇材料 / ${health.value.storage.chunks} 个知识片段`
   } catch (error) {
     health.value = null
@@ -66,7 +38,7 @@ async function ask() {
   asking.value = true
   response.value = null
   try {
-    response.value = await window.kpAPI.rag.invoke('ask', { query, limit: 8 }) as AskResponse
+    response.value = await knowledgeClient.ask(query, 8)
   } catch (error) {
     statusMessage.value = error instanceof Error ? error.message : '提问失败'
   } finally {
@@ -74,16 +46,9 @@ async function ask() {
   }
 }
 
-async function indexDocument(document: {
-  source_type: SourceType
-  source_id: string
-  title: string
-  content: string
-  url?: string
-  tags: string[]
-}) {
+async function indexDocument(document: KnowledgeDocument) {
   if (!document.content.trim() || !document.title.trim()) return
-  await window.kpAPI.rag.invoke('index', document)
+  await knowledgeClient.index(document)
 }
 
 async function syncKnowledge() {
@@ -144,7 +109,7 @@ async function syncKnowledge() {
   }
 }
 
-function openCitation(citation: Citation) {
+function openCitation(citation: KnowledgeCitation) {
   if (citation.source_type === 'rss' || citation.source_type === 'bookmark') {
     router.push(`/reader/${citation.source_type}/${encodeURIComponent(citation.source_id)}`)
     return
