@@ -119,15 +119,17 @@ function setBackupStatus(message: string) {
 
 async function exportBackup() {
   try {
-    const [relations, savedSearches, customTemplates, inquiryThreads] = await Promise.all([
+    const [relations, savedSearches, customTemplates, inquiryThreads, rag] = await Promise.all([
       window.kpAPI.settings.get('relations'),
       window.kpAPI.settings.get('savedSearches'),
       window.kpAPI.settings.get('customTemplates'),
-      window.kpAPI.settings.get('inquiryThreads')
+      window.kpAPI.settings.get('inquiryThreads'),
+      window.kpAPI.settings.get('rag')
     ])
     const backup = createBackup({
       theme: settingsStore.theme,
       services: settingsStore.services,
+      rag,
       local: {
         relations: Array.isArray(relations) ? relations : [],
         savedSearches: Array.isArray(savedSearches) ? savedSearches : [],
@@ -143,7 +145,7 @@ async function exportBackup() {
     link.click()
     document.body.removeChild(link)
     window.setTimeout(() => URL.revokeObjectURL(url), 100)
-    setBackupStatus('本地数据备份已导出。服务地址会保留，凭据不会包含在文件中。')
+    setBackupStatus('本地工作流备份已导出。服务地址会保留，凭据和 RAG 索引数据不会包含在文件中。')
   } catch (error) {
     setBackupStatus(error instanceof Error ? `导出失败：${error.message}` : '导出失败')
   }
@@ -169,6 +171,7 @@ async function importBackup(event: Event) {
     const backup = parseBackup(JSON.parse(await file.text()))
     await window.kpAPI.settings.set('services', backup.settings.services)
     await window.kpAPI.settings.set('theme', backup.settings.theme)
+    await window.kpAPI.settings.set('rag', backup.settings.rag)
     await window.kpAPI.settings.set('relations', backup.local.relations)
     await window.kpAPI.settings.set('savedSearches', backup.local.savedSearches)
     await window.kpAPI.settings.set('customTemplates', backup.local.customTemplates)
@@ -332,7 +335,7 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
       <section class="data-section">
         <div>
           <h3>数据迁移与备份</h3>
-          <p>导出本机的关系、智能集合、自定义模板、探究线和服务地址。API Key、Token 与密码始终不会被导出或导入。</p>
+          <p>导出本机的关系、智能集合、自定义模板、探究线和服务地址。API Key、Token、密码与 RAG 索引数据始终不会被导出或导入。</p>
         </div>
         <div class="data-actions">
           <button class="btn btn-secondary" @click="exportBackup">导出本地备份</button>

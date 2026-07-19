@@ -1,4 +1,4 @@
-import type { ServiceInstance, ServiceKind } from '@/services/types'
+import type { RagSettings, ServiceInstance, ServiceKind } from '@/services/types'
 import { normalizeInquiryThreads } from '@/lib/inquiry'
 
 export const BACKUP_FORMAT = 'knowledge-pipeline-backup'
@@ -18,6 +18,7 @@ export interface KnowledgePipelineBackup {
   settings: {
     theme: 'light' | 'dark'
     services: ServiceInstance[]
+    rag: RagSettings
   }
   local: BackupLocalData
 }
@@ -25,6 +26,7 @@ export interface KnowledgePipelineBackup {
 const SECRET_KEYS = new Set(['apiKey', 'token', 'password'])
 const SERVICE_KINDS = new Set<ServiceKind>(['rss', 'bookmark', 'memo', 'ai'])
 const MAX_LOCAL_ITEMS = 5000
+const DEFAULT_RAG: RagSettings = { baseUrl: 'http://127.0.0.1:8787' }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -40,6 +42,21 @@ function isSafeServiceUrl(value: unknown): value is string {
   } catch {
     return false
   }
+}
+
+function publicRag(value: unknown): RagSettings {
+  const record = asRecord(value)
+  if (!record || typeof record.baseUrl !== 'string') return DEFAULT_RAG
+  try {
+    const url = new URL(record.baseUrl)
+    const localHosts = new Set(['127.0.0.1', 'localhost', '[::1]'])
+    if (url.protocol === 'http:' && localHosts.has(url.hostname) && !url.username && !url.password && url.pathname === '/' && !url.search && !url.hash) {
+      return { baseUrl: url.origin }
+    }
+  } catch {
+    // A legacy/malformed endpoint must not make the rest of a backup unusable.
+  }
+  return DEFAULT_RAG
 }
 
 /** Credentials never cross the backup boundary, even when a caller supplies them. */
@@ -89,6 +106,7 @@ function publicServices(services: unknown): ServiceInstance[] {
 export function createBackup(input: {
   theme: 'light' | 'dark'
   services: unknown
+  rag?: unknown
   local: BackupLocalData
 }): KnowledgePipelineBackup {
   return {
@@ -97,7 +115,8 @@ export function createBackup(input: {
     exportedAt: new Date().toISOString(),
     settings: {
       theme: input.theme,
-      services: publicServices(input.services)
+      services: publicServices(input.services),
+      rag: publicRag(input.rag)
     },
     local: {
       relations: checkedArray(input.local.relations, '关系'),
@@ -122,6 +141,7 @@ export function parseBackup(value: unknown): KnowledgePipelineBackup {
   return createBackup({
     theme: settings.theme,
     services: settings.services,
+    rag: settings.rag,
     local: {
       relations: checkedArray(local.relations, '关系'),
       savedSearches: checkedArray(local.savedSearches, '智能集合'),
