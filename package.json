@@ -1,0 +1,70 @@
+{
+  "name": "knowledge-pipeline",
+  "version": "0.2.1",
+  "description": "个人知识流水线 - 统一客户端，串联 RSS 发现、链接收藏、速记笔记、Markdown 写作",
+  "main": "dist-electron/main/index.js",
+  "author": "knowledge-pipeline",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tomaxiwu-bit/knowledge-pipeline.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tomaxiwu-bit/knowledge-pipeline/issues"
+  },
+  "homepage": "https://github.com/tomaxiwu-bit/knowledge-pipeline#readme",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "electron:dev": "vite build && electron .",
+    "electron:build": "vue-tsc --noEmit && vite build && electron-builder",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "release:check": "npm run verify && npm audit --audit-level=high"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dompurify": "^3.0.11",
+    "electron-store": "^8.2.0",
+    "katex": "^0.18.0",
+    "marked": "^12.0.1",
+    "mermaid": "^11.16.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.5",
+    "vite-plugin-electron": "^1.1.0",
+    "vite-plugin-electron-renderer": "^1.0.0",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.7"
+  },
+  "build": {
+    "appId": "com.knowledge-pipeline.app",
+    "productName": "知识流水线",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}
