@@ -174,13 +174,21 @@ class KnowledgeStore:
 
     @staticmethod
     def _fts_query(query: str) -> str:
-        # unicode61 treats adjacent Han characters as one token.  Append an
-        # explicitly spaced copy at index time and query individual characters
-        # so keyword fallback remains useful for Chinese material without an
-        # external segmenter.
-        terms = re.findall(r'[A-Za-z0-9_]+', query) + re.findall(r'[\u4e00-\u9fff]', query)
-        terms = terms[:16]
-        return ' OR '.join(f'"{term.replace(chr(34), "")}"*' for term in terms if term)
+        """Build a MATCH expression from an allow-listed token set only.
+
+        The query is still supplied to SQLite as a bound parameter, but FTS5
+        parses MATCH's mini-language after binding.  Never interpolate user
+        punctuation into that language: preserve only bounded Latin/digit
+        tokens and individual Han characters, then add the fixed syntax here.
+        """
+        reserved = {'AND', 'OR', 'NOT', 'NEAR'}
+        latin_tokens = [
+            token for token in re.findall(r'[A-Za-z0-9]{1,64}', query.upper())
+            if token not in reserved
+        ]
+        cjk_tokens = re.findall(r'[\u4e00-\u9fff]', query)
+        tokens = (latin_tokens + cjk_tokens)[:16]
+        return ' OR '.join(f'"{token}"*' for token in tokens)
 
     @staticmethod
     def _fts_index_text(value: str) -> str:

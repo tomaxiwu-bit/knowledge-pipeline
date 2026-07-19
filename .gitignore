@@ -7,7 +7,9 @@ dist/
 dist-electron/
 release/
 data/
-server/.venv/
+server/.venv*/
+server/.coverage
+server/pytest-of-root/
 server/__pycache__/
 server/app/__pycache__/
 server/tests/__pycache__/

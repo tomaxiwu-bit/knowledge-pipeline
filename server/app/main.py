@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Response, status
+from typing import Annotated
+
+from fastapi import FastAPI, HTTPException, Path, Response, status
 
 from .config import get_settings
 from .ollama import OllamaClient
@@ -66,7 +68,7 @@ async def index_document(document: DocumentInput) -> IndexedDocument:
 
 
 @app.delete('/api/v1/knowledge/documents/{document_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_document(document_id: str) -> Response:
+async def delete_document(document_id: Annotated[str, Path(pattern=r'^doc_[a-f0-9]{24}$')]) -> Response:
     await service().delete(document_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

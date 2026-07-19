@@ -26,7 +26,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
       - run: npm ci
+      - run: cd server && uv sync --locked --group test
       - run: npm run release:check
       - run: npm run electron:build
       - uses: actions/upload-artifact@v4

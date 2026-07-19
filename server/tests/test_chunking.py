@@ -14,6 +14,17 @@ class ChunkingTests(unittest.TestCase):
     def test_blank_text_has_no_chunks(self):
         self.assertEqual(chunk_text(' \n\n '), [])
 
+    def test_invalid_chunk_settings_are_rejected(self):
+        with self.assertRaises(ValueError):
+            chunk_text('text', chunk_size=120)
+        with self.assertRaises(ValueError):
+            chunk_text('text', chunk_size=200, overlap=200)
+
+    def test_long_unbroken_sentence_is_split(self):
+        chunks = chunk_text('x' * 600, chunk_size=200, overlap=40)
+        self.assertGreater(len(chunks), 1)
+        self.assertTrue(all(chunk.content for chunk in chunks))
+
 
 if __name__ == '__main__':
     unittest.main()

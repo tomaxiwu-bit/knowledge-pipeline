@@ -9,7 +9,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Runtime configuration for the local-first RAG service."""
 
-    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
+    # A misspelled environment key is operationally dangerous: it can leave a
+    # service on an unexpected model, path, or endpoint.  Reject it at startup.
+    model_config = SettingsConfigDict(env_file='.env', extra='forbid')
 
     app_name: str = 'Knowledge Pipeline Intelligence Service'
     app_data_dir: Path = Path('./data')
