@@ -34,6 +34,7 @@ const showInquiryDialog = ref(false)
 const selectedInquiryId = ref('')
 const inquiryRole = ref<InquirySourceRole>('evidence')
 const inquiryNote = ref('')
+const indexing = ref(false)
 
 // AI 摘要相关状态
 const summary = ref<AISummary | null>(null)
@@ -284,6 +285,29 @@ async function addToInquiry() {
   showToast(source ? '已加入探究线' : '加入探究线失败')
 }
 
+async function addToKnowledge() {
+  if (!title.value || !content.value) {
+    showToast('暂无可加入知识库的内容')
+    return
+  }
+  indexing.value = true
+  try {
+    const result = await window.kpAPI.rag.invoke('index', {
+      source_type: props.source === 'rss' ? 'rss' : 'bookmark',
+      source_id: decodeURIComponent(props.id),
+      title: title.value,
+      content: content.value,
+      ...(url.value ? { url: url.value } : {}),
+      tags: []
+    }) as { semantic_indexed?: boolean }
+    showToast(result.semantic_indexed ? '已加入本地知识库' : '已保存到关键词索引；等待本地嵌入模型')
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : '加入知识库失败')
+  } finally {
+    indexing.value = false
+  }
+}
+
 // 数据导出
 function exportMarkdown() {
   if (!content.value) {
@@ -337,6 +361,9 @@ onMounted(async () => {
         </button>
         <button class="btn btn-secondary" @click="openInquiryDialog" title="将当前材料加入问题驱动的探究线">
           🧭 加入探究线
+        </button>
+        <button class="btn btn-secondary" @click="addToKnowledge" :disabled="indexing" title="向本地 RAG 知识库建立索引">
+          {{ indexing ? '🧠 入库中...' : '🧠 加入知识库' }}
         </button>
         <button class="btn btn-secondary" @click="exportMarkdown" title="导出为 Markdown 文件">
           📄 .md

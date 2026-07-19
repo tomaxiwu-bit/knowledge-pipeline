@@ -29,6 +29,11 @@ const router = createRouter({
       component: () => import('@/renderer/views/InquiryView.vue')
     },
     {
+      path: '/knowledge',
+      name: 'knowledge',
+      component: () => import('@/renderer/views/KnowledgeView.vue')
+    },
+    {
       path: '/reader/:source/:id',
       name: 'reader',
       component: () => import('@/renderer/views/ReaderView.vue'),

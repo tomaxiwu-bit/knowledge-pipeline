@@ -6,6 +6,7 @@ import { pathToFileURL } from 'url'
 import { createClient } from '../services/registry'
 import '../services'
 import type { AIConfig, ServiceInstance, ServiceKind } from '../services/types'
+import { DEFAULT_RAG_SETTINGS, invokeRagBackend, validateRagSettings, type RagBackendOperation, type RagSettings } from './rag'
 
 const isDev = !app.isPackaged
 const SECRET_FIELDS = ['apiKey', 'token', 'password'] as const
@@ -23,7 +24,8 @@ const settingsStore = new Store({
   name: 'knowledge-pipeline-settings',
   defaults: {
     theme: 'dark',
-    services: [] as StoredServiceInstance[]
+    services: [] as StoredServiceInstance[],
+    rag: DEFAULT_RAG_SETTINGS
   }
 })
 
@@ -160,7 +162,16 @@ function toPublicService(service: StoredServiceInstance): ServiceInstance {
 function publicSettings() {
   return {
     theme: settingsStore.get('theme'),
-    services: getStoredServices().map(toPublicService)
+    services: getStoredServices().map(toPublicService),
+    rag: getRagSettings()
+  }
+}
+
+function getRagSettings(): RagSettings {
+  try {
+    return validateRagSettings(looseSettingsStore.get('rag'))
+  } catch {
+    return DEFAULT_RAG_SETTINGS
   }
 }
 
@@ -352,6 +363,7 @@ function createWindow() {
 ipcMain.handle('settings:get', (_event, key: unknown) => {
   if (key === 'services') return getStoredServices().map(toPublicService)
   if (key === 'theme') return settingsStore.get('theme')
+  if (key === 'rag') return getRagSettings()
   if (key === 'relations' || key === 'savedSearches' || key === 'customTemplates' || key === 'inquiryThreads') return looseSettingsStore.get(key)
   throw new Error('不允许读取该设置项')
 })
@@ -362,6 +374,11 @@ ipcMain.handle('settings:set', (_event, key: unknown, value: unknown) => {
     if (value !== 'light' && value !== 'dark') throw new Error('主题值无效')
     settingsStore.set('theme', value)
     return true
+  }
+  if (key === 'rag') {
+    const rag = validateRagSettings(value)
+    settingsStore.set('rag', rag)
+    return rag
   }
   if (key === 'relations' || key === 'savedSearches' || key === 'customTemplates' || key === 'inquiryThreads') {
     if (!Array.isArray(value)) throw new Error('设置值格式无效')
@@ -408,6 +425,13 @@ ipcMain.handle('services:invoke', async (_event, serviceId: unknown, method: unk
     }
     throw error
   }
+})
+
+ipcMain.handle('rag:invoke', async (_event, operation: unknown, payload: unknown) => {
+  if (operation !== 'health' && operation !== 'index' && operation !== 'search' && operation !== 'ask' && operation !== 'delete') {
+    throw new Error('不允许的 RAG 操作')
+  }
+  return invokeRagBackend(getRagSettings(), operation as RagBackendOperation, payload)
 })
 
 app.whenReady().then(() => {

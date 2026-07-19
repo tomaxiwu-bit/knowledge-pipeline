@@ -1,6 +1,6 @@
 {
   "name": "knowledge-pipeline",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "个人知识流水线 - 统一客户端，串联 RSS 发现、链接收藏、速记笔记、Markdown 写作",
   "main": "dist-electron/main/index.js",
   "author": "knowledge-pipeline",

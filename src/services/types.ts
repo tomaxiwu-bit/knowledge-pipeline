@@ -131,6 +131,12 @@ export interface AISummaryOptions {
 export interface AllSettings {
   theme: 'light' | 'dark'
   services: ServiceInstance[]
+  rag: RagSettings
+}
+
+/** Local API endpoint for the full-text and RAG service. */
+export interface RagSettings {
+  baseUrl: string
 }
 
 /** 兼容旧版（迁移用） */

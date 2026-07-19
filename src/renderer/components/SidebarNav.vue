@@ -12,6 +12,7 @@ const navItems = [
   { name: 'daily', label: '每日笔记', icon: '📅', path: '/daily' },
   { name: 'search', label: '搜索', icon: '🔍', path: '/search' },
   { name: 'inquiry', label: '探究线', icon: '🧭', path: '/inquiry' },
+  { name: 'knowledge', label: '知识问答', icon: '🧠', path: '/knowledge' },
   { name: 'graph', label: '知识图谱', icon: '🕸️', path: '/graph' },
   { name: 'editor', label: '写作', icon: '✏️', path: '/editor' },
   { name: 'settings', label: '设置', icon: '⚙️', path: '/settings' }
@@ -53,7 +54,7 @@ const navItems = [
         <span class="theme-icon">{{ settingsStore.theme === 'dark' ? '☀️' : '🌙' }}</span>
         <span class="theme-label">{{ settingsStore.theme === 'dark' ? '亮色' : '暗色' }}</span>
       </button>
-      <span class="version">v0.2.1</span>
+      <span class="version">v0.3.0</span>
     </div>
   </nav>
 </template>

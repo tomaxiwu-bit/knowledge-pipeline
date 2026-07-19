@@ -94,6 +94,15 @@ registerAll([
     handler: () => router.push('/inquiry')
   },
   {
+    id: 'nav-knowledge',
+    title: '知识问答',
+    icon: '🧠',
+    description: '同步材料，并基于本地知识库提问',
+    keywords: 'rag knowledge question answer local 知识 问答 检索',
+    category: 'navigate',
+    handler: () => router.push('/knowledge')
+  },
+  {
     id: 'create-memo',
     title: '新建速记',
     icon: '📝',

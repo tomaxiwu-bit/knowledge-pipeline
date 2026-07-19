@@ -9,6 +9,10 @@ const api = {
   services: {
     invoke: (serviceId: string, method: string, args: unknown[] = []) =>
       ipcRenderer.invoke('services:invoke', serviceId, method, args)
+  },
+  rag: {
+    invoke: (operation: 'health' | 'index' | 'search' | 'ask' | 'delete', payload: unknown = {}) =>
+      ipcRenderer.invoke('rag:invoke', operation, payload)
   }
 }
 

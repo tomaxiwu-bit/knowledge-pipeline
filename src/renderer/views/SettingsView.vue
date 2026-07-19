@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useSettingsStore } from '@/renderer/stores/settings'
 import { listAllAdapters, KIND_LABELS, KIND_ICONS, getAdapterMeta } from '@/services/registry'
 import { createBackup, parseBackup } from '@/lib/backup'
@@ -17,6 +17,10 @@ const testResults = ref<Record<string, ConnectionResult>>({})
 const backupInput = ref<HTMLInputElement | null>(null)
 const backupStatus = ref('')
 const restoringBackup = ref(false)
+const ragBaseUrl = ref('http://127.0.0.1:8787')
+const ragStatus = ref('')
+const savingRag = ref(false)
+const testingRag = ref(false)
 
 // 添加后端的表单
 const addForm = ref({
@@ -195,6 +199,45 @@ function getStatusBadge(svc: ServiceInstance): { text: string; cls: string } {
   }
 }
 
+async function loadRagSettings() {
+  try {
+    const rag = await window.kpAPI.settings.get('rag') as { baseUrl?: string }
+    if (typeof rag?.baseUrl === 'string') ragBaseUrl.value = rag.baseUrl
+  } catch (error) {
+    ragStatus.value = error instanceof Error ? error.message : '无法读取本地知识服务配置'
+  }
+}
+
+async function saveRagSettings() {
+  savingRag.value = true
+  ragStatus.value = ''
+  try {
+    const saved = await window.kpAPI.settings.set('rag', { baseUrl: ragBaseUrl.value }) as { baseUrl?: string }
+    if (typeof saved?.baseUrl === 'string') ragBaseUrl.value = saved.baseUrl
+    ragStatus.value = '本地知识服务地址已保存。'
+  } catch (error) {
+    ragStatus.value = error instanceof Error ? error.message : '保存失败'
+  } finally {
+    savingRag.value = false
+  }
+}
+
+async function testRagService() {
+  testingRag.value = true
+  ragStatus.value = ''
+  try {
+    await saveRagSettings()
+    const health = await window.kpAPI.rag.invoke('health') as { storage?: { documents?: number; chunks?: number } }
+    ragStatus.value = `连接成功：${health.storage?.documents ?? 0} 篇材料，${health.storage?.chunks ?? 0} 个知识片段。`
+  } catch (error) {
+    ragStatus.value = error instanceof Error ? error.message : '连接失败'
+  } finally {
+    testingRag.value = false
+  }
+}
+
+onMounted(loadRagSettings)
+
 const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
 </script>
 
@@ -266,6 +309,23 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
               {{ testResults[svc.id].message }}
             </span>
           </div>
+        </div>
+      </section>
+
+      <section class="rag-section">
+        <div>
+          <h3>🧠 本地知识问答服务</h3>
+          <p>桌面应用通过受限的主进程代理连接本机 FastAPI 服务；知识正文保存在 SQLite，向量索引保存在 Chroma。默认地址无需修改。</p>
+        </div>
+        <div class="rag-controls">
+          <label for="rag-base-url">服务地址</label>
+          <div class="rag-input-row">
+            <input id="rag-base-url" v-model="ragBaseUrl" type="url" class="form-input" placeholder="http://127.0.0.1:8787" />
+            <button class="btn btn-secondary" :disabled="savingRag || testingRag" @click="saveRagSettings">保存</button>
+            <button class="btn btn-primary" :disabled="testingRag" @click="testRagService">{{ testingRag ? '检查中...' : '测试服务' }}</button>
+          </div>
+          <p class="field-help">出于安全和本地优先设计，仅接受本机 HTTP 地址。启动方法见 README 的「本地知识问答」部分。</p>
+          <p v-if="ragStatus" class="rag-status">{{ ragStatus }}</p>
         </div>
       </section>
 
@@ -520,6 +580,25 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
   border: 1px solid var(--border-color);
 }
 
+.rag-section {
+  display: grid;
+  grid-template-columns: minmax(190px, .9fr) minmax(300px, 1.4fr);
+  gap: 20px;
+  align-items: start;
+  margin: 12px 0 32px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.rag-section h3 { margin-bottom: 6px; font-size: 15px; }
+.rag-section > div > p { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.rag-controls label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 12px; }
+.rag-input-row { display: flex; gap: 8px; }
+.rag-input-row .form-input { min-width: 0; flex: 1; }
+.rag-status { margin-top: 8px; color: var(--success) !important; }
+
 .data-section {
   display: flex;
   align-items: center;
@@ -578,6 +657,9 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
   .data-actions {
     justify-content: flex-start;
   }
+
+  .rag-section { grid-template-columns: 1fr; }
+  .rag-input-row { flex-wrap: wrap; }
 }
 
 .help-section h3 {
