@@ -4,6 +4,8 @@ services:
       context: ./server
     env_file:
       - ./server/.env
+    environment:
+      APP_DATA_DIR: /app/data
     ports:
       - "127.0.0.1:8787:8787"
     volumes:
