@@ -6,6 +6,11 @@ node_modules/
 dist/
 dist-electron/
 release/
+data/
+server/.venv/
+server/__pycache__/
+server/app/__pycache__/
+server/tests/__pycache__/
 
 # IDE
 .vscode/
