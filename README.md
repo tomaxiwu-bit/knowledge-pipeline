@@ -361,6 +361,81 @@ data/                   # 运行时 SQLite + Chroma 数据（默认忽略，不�
 
 知识流水线的独有闭环是：**材料同步 → 证据检索 → 有来源回答 → 回到阅读/探究线形成判断**。它用 SQLite 保存可审计的文本事实，用 Chroma 做语义召回，用 RRF 和本地重排减少单一检索器的盲区；如果模型不在，用户仍能看到原始证据而不是被一个看似流畅的回答误导。
 
+## 配置参考
+
+所有运行时配置通过环境变量设置（默认值开箱即用）：
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Ollama 服务地址 |
+| `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | 嵌入模型名称 |
+| `OLLAMA_CHAT_MODEL` | `qwen3:4b` | 对话模型名称 |
+| `RERANKER_MODE` | `lexical` | 重排模式：`lexical`（内置词法，零依赖）或 `cross_encoder` |
+| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | Cross-Encoder 模型（仅在 `cross_encoder` 模式使用） |
+| `REQUEST_TIMEOUT_SECONDS` | `60.0` | Ollama 请求超时秒数 |
+| `APP_DATA_DIR` | `./data` | SQLite + Chroma 数据存储目录 |
+
+> 未知变量会导致启动失败（`extra='forbid'`），防止拼写错误静默回退。
+
+## API 文档
+
+智能服务启动后，自动交互式文档可在 `http://localhost:8787/docs` 查看。以下为主要端点：
+
+### `GET /health`
+服务健康检查，返回各组件状态、文档/向量计数。
+
+### `POST /api/v1/knowledge/documents`
+入库一篇文章（分块 + 向量化）。
+**请求体**：
+```json
+{
+  "source_type": "rss",
+  "source_id": "entry-123",
+  "title": "文章标题",
+  "url": "https://example.com/article",
+  "tags": ["tech", "AI"],
+  "content": "文章正文内容……"
+}
+```
+
+### `DELETE /api/v1/knowledge/documents/{document_id}`
+删除文档及其所有分块和向量。`document_id` 须匹配 `doc_[a-f0-9]{24}` 格式。
+
+### `POST /api/v1/knowledge/search`
+混合检索（FTS5 + 向量语义 + RRF 融合），返回匹配分块。
+**请求体**：
+```json
+{
+  "query": "搜索关键词",
+  "limit": 10
+}
+```
+
+### `POST /api/v1/knowledge/ask`
+基于检索证据生成有来源回答。Ollama 不可用时降级为纯证据检索。
+**请求体**：
+```json
+{
+  "query": "你的问题",
+  "limit": 10,
+  "include_context": true
+}
+```
+
+## 常见问题（FAQ）
+
+### Electron 窗口白屏 / 启动后无反应
+确认 `npm run build` 成功。首次启动 Electron 会从 `dist/` 和 `dist-electron/` 加载渲染进程和预加载脚本；若构建产物缺失或损坏，窗口不会显示报错但保持空白。运行 `npm run electron:dev` 重建。
+
+### `docker compose up` 后智能服务连不上
+确认 `server/.env` 存在且 `OLLAMA_BASE_URL` 正确。Linux 上默认使用 `host.docker.internal` 访问宿主机 Ollama；若 Docker 版本不支持，改为宿主机局域网 IP 或直接在主机运行 Python 服务。
+
+### 知识问答返回空结果
+确认已通过「同步已连接来源」或阅读页「🧠 加入知识库」导入数据。搜索时注意关键词匹配：FTS5 使用 unicode61 分词器，中文按单字拆分，英文按空格分词。向量检索在文档数少于 5 篇时效果有限。
+
+### 提示「服务不可用」但 Ollama 在运行
+检查 Ollama 是否允许跨域访问。Ollama 默认监听 `127.0.0.1:11434`，若智能服务运行在 Docker 容器内，需设置 `OLLAMA_BASE_URL=http://host.docker.internal:11434`。也可将 Ollama 绑定到 `0.0.0.0` 并设置 `OLLAMA_ORIGINS=*`，但不推荐在主机上这样做。
+
 ## 反馈与贡献
 
 - **Bug 反馈 / 功能建议**：请提交 [GitHub Issue](https://github.com/tomaxiwu-bit/knowledge-pipeline/issues)，选择对应标签（`bug` / `feature` / `question`）
