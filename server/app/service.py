@@ -28,10 +28,6 @@ class KnowledgeService:
         previous_chunk_ids = self.store.chunk_ids(document_id)
         chunk_ids = self.store.replace_chunks(document_id, [chunk.content for chunk in chunks])
         semantic_error: str | None = None
-        # Remove prior vectors before replacing an edited document. SQLite stays
-        # canonical, so a failed embedding pass falls back to current FTS text
-        # rather than serving stale semantic evidence.
-        self.vector_index.delete(previous_chunk_ids)
         try:
             embeddings = await self.ollama.embeddings([chunk.content for chunk in chunks])
             self.vector_index.upsert(
@@ -41,6 +37,15 @@ class KnowledgeService:
                     for _ in chunks
                 ],
             )
+            # Only delete stale prior vectors after the new embeddings are
+            # safely in Chroma. Old and new chunk_ids can overlap (same
+            # document_id:ordinal), so remove only IDs that are no longer
+            # present. If the embedding pass failed above, old vectors are
+            # preserved so semantic search still finds the document.
+            new_id_set = set(chunk_ids)
+            stale_ids = [old_id for old_id in previous_chunk_ids if old_id not in new_id_set]
+            if stale_ids:
+                self.vector_index.delete(stale_ids)
         except OllamaUnavailable as error:
             semantic_error = str(error)
         return IndexedDocument(

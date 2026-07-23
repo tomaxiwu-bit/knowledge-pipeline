@@ -113,7 +113,9 @@ def test_index_remains_keyword_available_when_embedding_model_is_down():
 
     assert indexed.semantic_indexed is False
     assert indexed.semantic_error == 'embedding model unavailable'
-    assert service.vector_index.deleted == [['old:0']]
+    # Old vectors are preserved so semantic search still finds the document
+    # while the embedding model is unavailable.
+    assert service.vector_index.deleted == []
     assert service.vector_index.upserts == []
 
 

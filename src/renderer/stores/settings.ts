@@ -116,7 +116,7 @@ export const useSettingsStore = defineStore('settings', () => {
     clientMap.clear()
     for (const svc of services.value) {
       clientMap.set(svc.id, {
-        instance: createRendererServiceClient(svc.id, !!svc.configured),
+        instance: createRendererServiceClient(svc.id, svc.kind, !!svc.configured),
         status: svc.configured ? 'idle' : 'unconfigured'
       })
     }

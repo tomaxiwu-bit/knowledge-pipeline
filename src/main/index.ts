@@ -256,6 +256,11 @@ function hydrateServiceConfig(service: StoredServiceInstance): ServiceInstance['
 }
 
 function migrateStoredSecrets(): void {
+  // If the OS keychain is unavailable, skip migration entirely instead of
+  // crashing. Credentials will remain in their current (possibly legacy)
+  // location until the user configures a working keychain.
+  if (!usesSecureStorage()) return
+
   const services = getStoredServices()
   if (services.length > 0) {
     // Older versions stored apiKey directly inside the settings file. Re-save
@@ -435,7 +440,11 @@ ipcMain.handle('rag:invoke', async (_event, operation: unknown, payload: unknown
 })
 
 app.whenReady().then(() => {
-  migrateStoredSecrets()
+  try {
+    migrateStoredSecrets()
+  } catch (error) {
+    console.error('[Migration] 凭据迁移失败，跳过:', error)
+  }
   createWindow()
 })
 

@@ -33,6 +33,11 @@ class KnowledgeStore:
         connection = sqlite3.connect(self.path)
         connection.row_factory = sqlite3.Row
         connection.execute('PRAGMA foreign_keys = ON')
+        # WAL mode improves concurrency (readers don't block writers) and
+        # busy_timeout lets a waiting connection retry for up to 5 seconds
+        # before raising SQLITE_BUSY.
+        connection.execute('PRAGMA journal_mode = WAL')
+        connection.execute('PRAGMA busy_timeout = 5000')
         return connection
 
     def initialise(self) -> None:

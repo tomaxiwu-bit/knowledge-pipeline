@@ -7,7 +7,21 @@
 // 使用方式：import { renderMarkdown, renderMermaid } from '@/lib/markdown'
 
 import { marked, type Tokens, type TokenizerExtension, type RendererExtension } from 'marked'
-import DOMPurify from 'dompurify'
+import createDOMPurify from 'dompurify'
+
+// DOMPurify needs a DOM window to operate. In Electron's renderer process,
+// window is globally available and DOMPurify is initialized eagerly. In
+// Node.js (tests, SSR) without a window, purify stays null and sanitization
+// is skipped — the caller still gets the rendered HTML, just without the
+// XSS safety net that only matters in a real browser context.
+const purify = typeof window !== 'undefined'
+  ? createDOMPurify(window as unknown as Window)
+  : null
+
+/** Sanitize HTML with DOMPurify, falling back to the raw input when no DOM is available. */
+function sanitizeHTML(html: string, config?: Record<string, unknown>): string {
+  return purify ? purify.sanitize(html, config) : html
+}
 
 // ==高亮== 扩展
 const markExtension: { extensions: (TokenizerExtension & RendererExtension)[] } = {
@@ -92,6 +106,9 @@ marked.use(footnoteExtension)
  * 渲染 Markdown 为 HTML
  * 支持：标准 Markdown + ==高亮== + 脚注 + 数学公式占位 + Mermaid 占位
  * 数学公式和 Mermaid 需要调用方在渲染后异步处理（见 renderMath 和 renderMermaid）
+ *
+ * 返回的 HTML 已经过 DOMPurify 净化，调用方无需再次净化。这确保即使未来
+ * 新增调用方忘记净化，输出也是 XSS 安全的。
  */
 export function renderMarkdown(content: string): string {
   if (!content) return ''
@@ -108,7 +125,12 @@ export function renderMarkdown(content: string): string {
     return `<span class="math-inline" data-math="${encodeURIComponent(escaped)}">${escaped}</span>`
   })
 
-  return html
+  // 内置 DOMPurify 净化，确保输出始终是 XSS 安全的。
+  // 允许 markdown 扩展使用的自定义标签和属性（mark、data-math 等）。
+  return sanitizeHTML(html, {
+    ADD_TAGS: ['mark', 'div', 'span'],
+    ADD_ATTR: ['data-math']
+  })
 }
 
 /**
@@ -137,7 +159,7 @@ export async function renderMermaid(container: HTMLElement | null): Promise<void
       const { svg } = await mermaid.render(id, code)
       const wrapper = block.parentElement
       if (wrapper) {
-        wrapper.innerHTML = DOMPurify.sanitize(svg, {
+        wrapper.innerHTML = sanitizeHTML(svg, {
           USE_PROFILES: { svg: true, svgFilters: true }
         })
         wrapper.classList.add('mermaid-rendered')
