@@ -5,6 +5,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/tomaxiwu-bit/knowledge-pipeline/actions/workflows/ci.yml"><img src="https://github.com/tomaxiwu-bit/knowledge-pipeline/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <img src="https://img.shields.io/badge/Electron-43-47848F?logo=electron" alt="Electron" />
   <img src="https://img.shields.io/badge/Vue_3-4FC08D?logo=vue.js" alt="Vue 3" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript" alt="TypeScript" />
@@ -179,8 +180,28 @@ uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8787
 ### 质量门槛（v0.3.1）
 
 - 后端使用锁定的 `uv.lock`；CI 先执行 `uv lock --check` 和 `uv sync --locked --group test`，不会在构建时重新解析依赖版本。
-- 后端测试覆盖服务编排、五个 HTTP 端点、SQLite/FTS 边界、Ollama/Chroma 适配器和配置失败路径；分支覆盖率低于 **85%** 时 CI 失败。
+- 后端当前有 **40 个测试**，覆盖服务编排、五个 HTTP 端点、SQLite/FTS 边界、Ollama/Chroma 适配器、检索指标和配置失败路径；分支覆盖率低于 **85%** 时 CI 失败。
 - 桌面端测试覆盖 RAG IPC 主进程校验和渲染进程客户端契约，确保 UI 只能使用固定的、本机回环 API 操作。
+
+### 可复现检索评测
+
+仓库提供端到端评测脚本和一个小型生物医学样例集。脚本会用每次运行唯一的 ID 临时写入带标签的文档，调用真实搜索 API，计算 `Recall@k`、MRR、`nDCG@k`、P50/P95 延迟，并在结束时删除评测文档，不覆盖已有来源。
+
+```bash
+# 终端 1：启动本地智能服务
+cd server
+uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8787
+
+# 终端 2：执行默认的 5 查询生物医学评测
+npm run benchmark:retrieval
+
+# 使用自己的标注数据集或调整 k
+cd server
+uv run --locked python -m scripts.evaluate_retrieval \
+  --dataset evaluation/your-dataset.json --limit 10
+```
+
+样例集用于验证评测链路，不代表产品质量结论。为了让结果可比较，建议使用独立的 `APP_DATA_DIR` 启动服务，避免个人语料影响排名。发布检索指标时，应使用规模更大、独立标注且不参与调参的数据集，并同时报告运行硬件与模型配置。
 
 ## 架构设计
 
@@ -458,4 +479,4 @@ data/                   # 运行时 SQLite + Chroma 数据（默认忽略，不�
 
 ## 许可证
 
-[MIT](LICENSE) &copy; 2025 knowledge-pipeline
+[MIT](LICENSE) &copy; 2026 tomaxiwu-bit

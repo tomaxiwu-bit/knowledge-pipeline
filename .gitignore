@@ -8,8 +8,11 @@ dist-electron/
 release/
 data/
 server/.venv*/
+server/.uv-cache/
 server/.coverage
 server/pytest-of-root/
+__pycache__/
+*.py[cod]
 server/__pycache__/
 server/app/__pycache__/
 server/tests/__pycache__/

@@ -4,9 +4,11 @@ import hashlib
 import json
 import re
 import sqlite3
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Iterator
 
 
 @dataclass(frozen=True)
@@ -29,16 +31,24 @@ class KnowledgeStore:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.path)
         connection.row_factory = sqlite3.Row
-        connection.execute('PRAGMA foreign_keys = ON')
-        # WAL mode improves concurrency (readers don't block writers) and
-        # busy_timeout lets a waiting connection retry for up to 5 seconds
-        # before raising SQLITE_BUSY.
-        connection.execute('PRAGMA journal_mode = WAL')
-        connection.execute('PRAGMA busy_timeout = 5000')
-        return connection
+        try:
+            connection.execute('PRAGMA foreign_keys = ON')
+            # WAL mode improves concurrency (readers don't block writers) and
+            # busy_timeout lets a waiting connection retry for up to 5 seconds
+            # before raising SQLITE_BUSY.
+            connection.execute('PRAGMA journal_mode = WAL')
+            connection.execute('PRAGMA busy_timeout = 5000')
+            yield connection
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
 
     def initialise(self) -> None:
         with self._connect() as connection:

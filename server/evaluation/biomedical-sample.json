@@ -1,0 +1,61 @@
+{
+  "documents": [
+    {
+      "source_type": "manual",
+      "source_id": "eval-biomed-pcr",
+      "title": "PCR primer design fundamentals",
+      "content": "PCR primers commonly use 18 to 25 nucleotides, balanced GC content, similar melting temperatures, and minimal self-complementarity. Primer dimers and strong hairpins can reduce amplification efficiency.",
+      "tags": ["bioengineering", "PCR", "primer-design"]
+    },
+    {
+      "source_type": "manual",
+      "source_id": "eval-biomed-plasmid",
+      "title": "Plasmid cloning workflow",
+      "content": "Restriction cloning selects compatible enzymes, digests vector and insert, purifies DNA fragments, performs ligation, transforms competent cells, and verifies colonies by sequencing or diagnostic digestion.",
+      "tags": ["bioengineering", "plasmid", "cloning"]
+    },
+    {
+      "source_type": "manual",
+      "source_id": "eval-biomed-ecg",
+      "title": "ECG signal preprocessing",
+      "content": "Electrocardiogram preprocessing can remove baseline wander and power-line interference before QRS detection. Patient-level train and test splits help prevent subject leakage in arrhythmia classification.",
+      "tags": ["bioengineering", "ECG", "signal-processing"]
+    },
+    {
+      "source_type": "manual",
+      "source_id": "eval-biomed-protein",
+      "title": "Protein purification by affinity chromatography",
+      "content": "Affinity chromatography separates a tagged recombinant protein through selective binding to an immobilized ligand. Wash conditions remove nonspecific proteins before controlled elution.",
+      "tags": ["bioengineering", "protein", "chromatography"]
+    },
+    {
+      "source_type": "manual",
+      "source_id": "eval-biomed-cell-culture",
+      "title": "Mammalian cell culture contamination control",
+      "content": "Aseptic technique, routine mycoplasma screening, authenticated cell lines, clean incubators, and controlled media handling reduce contamination risk in mammalian cell culture.",
+      "tags": ["bioengineering", "cell-culture", "quality-control"]
+    }
+  ],
+  "queries": [
+    {
+      "query": "How should PCR primers avoid dimers and hairpins?",
+      "relevant_source_ids": ["eval-biomed-pcr"]
+    },
+    {
+      "query": "What are the main restriction cloning and ligation steps?",
+      "relevant_source_ids": ["eval-biomed-plasmid"]
+    },
+    {
+      "query": "How can patient leakage be prevented in ECG arrhythmia classification?",
+      "relevant_source_ids": ["eval-biomed-ecg"]
+    },
+    {
+      "query": "How does affinity chromatography purify recombinant proteins?",
+      "relevant_source_ids": ["eval-biomed-protein"]
+    },
+    {
+      "query": "Which practices reduce mycoplasma and cell culture contamination?",
+      "relevant_source_ids": ["eval-biomed-cell-culture"]
+    }
+  ]
+}

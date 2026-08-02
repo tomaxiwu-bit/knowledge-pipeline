@@ -15,7 +15,7 @@ import createDOMPurify from 'dompurify'
 // is skipped — the caller still gets the rendered HTML, just without the
 // XSS safety net that only matters in a real browser context.
 const purify = typeof window !== 'undefined'
-  ? createDOMPurify(window as unknown as Window)
+  ? createDOMPurify()
   : null
 
 /** Sanitize HTML with DOMPurify, falling back to the raw input when no DOM is available. */

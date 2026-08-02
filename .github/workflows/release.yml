@@ -5,18 +5,13 @@ on:
   push:
     tags: ['v*']
 
-permissions:
-  contents: read
-
 jobs:
-  package:
-    name: Package (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+  verify:
+    name: Verify release source
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,9 +27,52 @@ jobs:
       - run: npm ci
       - run: cd server && uv sync --locked --group test
       - run: npm run release:check
+
+  package:
+    name: Package (${{ matrix.os }})
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npm run electron:build
       - uses: actions/upload-artifact@v4
         with:
           name: knowledge-pipeline-${{ matrix.os }}
           path: release/**
           if-no-files-found: error
+
+  publish:
+    name: Attach packages to GitHub Release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Create release when needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME"; then
+            gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME"
+          fi
+      - name: Upload desktop packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -d '' assets < <(find release-assets -type f -print0)
+          gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
