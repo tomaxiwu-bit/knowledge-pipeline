@@ -45,7 +45,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run electron:build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: knowledge-pipeline-${{ matrix.os }}
           path: release/**
