@@ -41,7 +41,7 @@ function startAdd(kind: ServiceKind) {
   const meta = adapters[0]
   if (meta) {
     for (const field of meta.configFields) {
-      addForm.value.config[field.key] = ''
+      addForm.value.config[field.key] = field.defaultValue ?? ''
     }
   }
   showAddDialog.value = true
@@ -52,7 +52,7 @@ function onAdapterChange() {
   if (meta) {
     const newConfig: Record<string, string> = {}
     for (const field of meta.configFields) {
-      newConfig[field.key] = addForm.value.config[field.key] ?? ''
+      newConfig[field.key] = field.defaultValue ?? ''
     }
     addForm.value.config = newConfig
   }
@@ -88,6 +88,11 @@ async function removeInstance(id: string) {
   if (confirm('确定删除这个后端配置吗？')) {
     await settingsStore.removeService(id)
   }
+}
+
+async function useAIService(svc: ServiceInstance) {
+  settingsStore.services = [svc, ...settingsStore.services.filter((item) => item.id !== svc.id)]
+  await settingsStore.save()
 }
 
 async function testInstance(svc: ServiceInstance) {
@@ -265,6 +270,7 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
 
       <!-- 按环节分组展示 -->
       <section v-for="kind in kinds" :key="kind" class="kind-section">
+        <p v-if="kind === 'ai'" class="field-help">摘要和知识库问答使用列表中第一个已配置的 AI 服务。摘要原文、问题及检索片段会发送到该 API；索引仍保存在本机。切换服务类型会清空表单密钥。</p>
         <div class="kind-header">
           <h2>
             <span class="kind-icon">{{ KIND_ICONS[kind] }}</span>
@@ -304,6 +310,7 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
           </div>
 
           <div class="service-actions">
+            <button v-if="kind === 'ai'" class="btn btn-secondary btn-sm" :disabled="!svc.configured || settingsStore.services.find(item => item.kind === 'ai' && item.configured)?.id === svc.id" @click="useAIService(svc)">用于摘要和问答</button>
             <button class="btn btn-secondary btn-sm" @click="testInstance(svc)" :disabled="testing === svc.id">
               {{ testing === svc.id ? '测试中...' : '测试连接' }}
             </button>

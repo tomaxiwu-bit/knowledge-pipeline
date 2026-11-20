@@ -1,8 +1,28 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { invokeRagBackend, validateRagSettings } from '../src/main/rag'
+import { answerKnowledgeWithAI, invokeRagBackend, validateRagSettings } from '../src/main/rag'
 
 describe('RAG main-process boundary', () => {
   afterEach(() => vi.unstubAllGlobals())
+
+  it('uses local search and sends cited evidence to the selected API', async () => {
+    const citation = { index: 1, title: 'Document', excerpt: 'Evidence', document_id: 'doc_a', chunk_id: 'one' }
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [citation], retrieval: { keyword_candidates: 1 } })))
+    vi.stubGlobal('fetch', fetchMock)
+    const answer = vi.fn().mockResolvedValue({ content: 'Answer [1]', model: 'cloud-model' })
+    const result = await answerKnowledgeWithAI({ baseUrl: 'http://localhost:8787' }, { query: 'Question', limit: 8 }, { answer })
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:8787/api/v1/knowledge/search')
+    expect(answer).toHaveBeenCalledWith('Question', '[1] Document\nEvidence')
+    expect(result).toMatchObject({ answer: 'Answer [1]', citations: [citation], model: 'cloud-model' })
+    expect(result).not.toHaveProperty('context')
+  })
+
+  it('does not call a paid API without retrieved evidence', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [], retrieval: {} }))))
+    const answer = vi.fn()
+    const result = await answerKnowledgeWithAI({ baseUrl: 'http://localhost:8787' }, { query: 'Question' }, { answer })
+    expect(result.mode).toBe('retrieval_only')
+    expect(answer).not.toHaveBeenCalled()
+  })
 
   it('accepts only clean loopback HTTP endpoints', () => {
     expect(validateRagSettings({ baseUrl: 'http://localhost:8787/' })).toEqual({ baseUrl: 'http://localhost:8787' })

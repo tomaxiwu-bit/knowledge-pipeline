@@ -6,7 +6,7 @@ import { pathToFileURL } from 'url'
 import { createClient } from '../services/registry'
 import '../services'
 import type { AIConfig, ServiceInstance, ServiceKind } from '../services/types'
-import { DEFAULT_RAG_SETTINGS, invokeRagBackend, validateRagSettings, type RagBackendOperation, type RagSettings } from './rag'
+import { answerKnowledgeWithAI, DEFAULT_RAG_SETTINGS, invokeRagBackend, validateRagSettings, type RagBackendOperation, type RagSettings } from './rag'
 
 const isDev = !app.isPackaged
 const SECRET_FIELDS = ['apiKey', 'token', 'password'] as const
@@ -53,7 +53,7 @@ const SERVICE_METHODS: Record<ServiceKind, ReadonlySet<string>> = {
   rss: new Set(['testConnection', 'getUnreadItems', 'getItemContent', 'markAsRead', 'starItem']),
   bookmark: new Set(['testConnection', 'getBookmarks', 'createBookmark', 'archiveBookmark']),
   memo: new Set(['testConnection', 'getMemos', 'createMemo', 'deleteMemo']),
-  ai: new Set(['testConnection', 'summarize'])
+  ai: new Set(['testConnection', 'summarize', 'answer'])
 }
 
 const CACHEABLE_SERVICE_METHODS = new Set([
@@ -84,7 +84,7 @@ function usesSecureStorage(): boolean {
   if (!safeStorage.isEncryptionAvailable()) return false
   // Linux can fall back to basic_text when no keyring is available. Treat that
   // as unavailable rather than incorrectly claiming that credentials are safe.
-  return safeStorage.getSelectedStorageBackend() !== 'basic_text'
+  return process.platform !== 'linux' || safeStorage.getSelectedStorageBackend() !== 'basic_text'
 }
 
 function encryptSecret(value: string): string {
@@ -326,7 +326,7 @@ function createWindow() {
     backgroundColor: '#1a1a2e',
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
+      preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       webSecurity: true,
@@ -435,6 +435,15 @@ ipcMain.handle('services:invoke', async (_event, serviceId: unknown, method: unk
 ipcMain.handle('rag:invoke', async (_event, operation: unknown, payload: unknown) => {
   if (operation !== 'health' && operation !== 'index' && operation !== 'search' && operation !== 'ask' && operation !== 'delete') {
     throw new Error('不允许的 RAG 操作')
+  }
+  if (operation === 'ask') {
+    const ai = getStoredServices().find((service) => service.kind === 'ai' && isServiceConfigured(service))
+    if (ai) {
+      const client = createClient(ai.clientId)
+      if (!client || !('answer' in client)) throw new Error('AI 服务不支持知识问答')
+      client.configure(hydrateServiceConfig(ai) as AIConfig)
+      return answerKnowledgeWithAI(getRagSettings(), payload, client)
+    }
   }
   return invokeRagBackend(getRagSettings(), operation as RagBackendOperation, payload)
 })

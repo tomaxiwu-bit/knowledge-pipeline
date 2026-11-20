@@ -4,6 +4,8 @@
   <em>本地优先的全栈个人知识工作台</em>
 </p>
 
+AI 摘要和知识库作答已支持 OpenAI / Codex、Claude、DeepSeek API，可在设置中切换服务。配置方式和数据发送范围见 [API 接入指南](docs/AI_API_SETUP.md)。
+
 <p align="center">
   <a href="https://github.com/tomaxiwu-bit/knowledge-pipeline/actions/workflows/ci.yml"><img src="https://github.com/tomaxiwu-bit/knowledge-pipeline/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <img src="https://img.shields.io/badge/Electron-43-47848F?logo=electron" alt="Electron" />
@@ -128,7 +130,7 @@ npm run electron:build
 
 ### 启动本地知识问答服务
 
-知识问答不需要把材料发到第三方。默认使用本机 [Ollama](https://ollama.com/) 做嵌入和作答，FastAPI、SQLite 与 Chroma 可用 Docker 一起启动：
+未配置云端 AI API 时，知识问答默认使用本机 [Ollama](https://ollama.com/) 做嵌入和作答。配置 API 后，问题与检索片段会发送到所选服务商，本地索引仍由 FastAPI、SQLite 与 Chroma 维护；本地服务可用 Docker 一起启动：
 
 ```bash
 # 1. 准备本地模型（首次下载）
@@ -152,7 +154,7 @@ uv sync --locked --group test
 uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8787
 ```
 
-> `server/uv.lock` 是受版本控制的完整依赖图；`requirements*.txt` 由它导出，供 Docker 和不使用 uv 的环境使用。Linux Docker 用户通常可使用随附的 `host-gateway` 映射访问宿主机 Ollama；如环境不支持，请把 `OLLAMA_BASE_URL` 改成宿主机可达地址，或直接在主机运行 FastAPI。若 Ollama/嵌入模型暂不可用，SQLite FTS5 仍可索引和检索材料，但不会生成向量。要启用本地 Cross-Encoder 重排，请运行 `uv sync --locked --group rerank`，然后设置 `RERANKER_MODE=cross_encoder`。
+> `server/uv.lock` 是受版本控制的完整依赖图；`requirements.txt` 由它导出供 Docker 构建使用。Linux Docker 用户通常可使用随附的 `host-gateway` 映射访问宿主机 Ollama；如环境不支持，请把 `OLLAMA_BASE_URL` 改成宿主机可达地址，或直接在主机运行 FastAPI。若 Ollama/嵌入模型暂不可用，SQLite FTS5 仍可索引和检索材料，但不会生成向量。要启用本地 Cross-Encoder 重排，请运行 `uv sync --locked --group rerank`，然后设置 `RERANKER_MODE=cross_encoder`。
 
 ### 配置后端
 
@@ -234,7 +236,7 @@ import './your-backend'
 | RSS 发现 | `RSSClient` | FreshRSS | Miniflux、Tiny Tiny RSS 等（待实现） |
 | 链接收藏 | `BookmarkClient` | Karakeep | Wallabag、Linkwarden 等（待实现） |
 | 速记笔记 | `MemoClient` | Memos | Joplin Server、Trilium 等（待实现） |
-| AI 摘要 | `AIClient` | OpenAI 兼容 / Ollama | 专用 Azure 适配器等（待实现） |
+| AI 摘要与作答 | `AIClient` | OpenAI / Codex Responses、Claude、DeepSeek、OpenAI 兼容 / Ollama | 其他专用适配器 |
 
 ### 项目结构
 

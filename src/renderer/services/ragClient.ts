@@ -28,6 +28,7 @@ export interface KnowledgeAnswer {
   mode: 'grounded_generation' | 'retrieval_only'
   retrieval: { keyword_candidates: number; vector_candidates: number; reranker: string }
   context?: string | null
+  model?: string
 }
 
 export interface KnowledgeHealth {

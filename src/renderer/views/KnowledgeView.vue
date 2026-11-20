@@ -17,6 +17,7 @@ const syncProgress = ref('')
 
 const ready = computed(() => health.value?.status === 'ok')
 const hasSources = computed(() => settingsStore.services.some((service) => service.configured && ['rss', 'bookmark', 'memo'].includes(service.kind)))
+const aiService = computed(() => settingsStore.services.find((service) => service.kind === 'ai' && service.configured))
 
 function getClient<T>(kind: 'rss' | 'bookmark' | 'memo'): T | null {
   return settingsStore.getClientByKind(kind) as T | null
@@ -117,7 +118,7 @@ function openCitation(citation: KnowledgeCitation) {
   if (citation.url) window.open(citation.url, '_blank', 'noopener')
 }
 
-onMounted(refreshHealth)
+onMounted(async () => { await settingsStore.load(); await refreshHealth() })
 </script>
 
 <template>
@@ -126,7 +127,7 @@ onMounted(refreshHealth)
       <div>
         <p class="eyebrow">LOCAL RAG WORKBENCH</p>
         <h1>知识问答</h1>
-        <p class="subtitle">以你的 RSS、收藏和笔记为证据的本地问答。回答会附带可追溯来源，而不是把模型猜测当作知识。</p>
+        <p class="subtitle">从本机 RSS、收藏和笔记中检索证据，回答附带可追溯来源。{{ aiService ? `作答服务：${aiService.name}。问题和检索片段会发送到该 API。` : '未配置 AI API 时使用本地 Ollama；不可用时仅展示检索证据。' }}</p>
       </div>
       <div class="service-status" :class="{ online: ready }">
         <span class="status-dot"></span>
@@ -170,7 +171,7 @@ onMounted(refreshHealth)
 
     <section v-if="response" class="answer-card">
       <div class="answer-meta">
-        <span>{{ response.mode === 'grounded_generation' ? '本地模型已基于证据作答' : '检索模式：本地对话模型不可用' }}</span>
+        <span>{{ response.mode === 'grounded_generation' ? `已基于证据作答${response.model ? ` · ${response.model}` : ' · 本地模型'}` : '检索模式：暂无生成回答' }}</span>
         <span>关键词 {{ response.retrieval.keyword_candidates }} · 向量 {{ response.retrieval.vector_candidates }} · {{ response.retrieval.reranker }}</span>
       </div>
       <h2>{{ response.query }}</h2>

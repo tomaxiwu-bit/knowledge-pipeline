@@ -92,6 +92,7 @@ export interface AIClient {
   isConfigured(): boolean
   testConnection(): Promise<ConnectionResult>
   summarize(text: string, options?: AISummaryOptions): Promise<AISummary>
+  answer(question: string, context: string): Promise<AISummary>
 }
 
 // ============ 配置类型 ============
@@ -173,6 +174,7 @@ export interface ConfigField {
   label: string
   type: 'text' | 'password' | 'url'
   placeholder?: string
+  defaultValue?: string
   help?: string
   required: boolean
 }

@@ -90,6 +90,7 @@ export function createRendererServiceClient(
         kind: 'ai' as const,
         summarize: (text: string, options?: AISummaryOptions) =>
           call<AISummary>('summarize', text, options),
+        answer: (question: string, context: string) => call<AISummary>('answer', question, context),
       }
     default: {
       // Exhaustiveness guard — if ServiceKind gains a new variant this will

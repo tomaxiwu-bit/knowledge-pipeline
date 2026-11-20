@@ -9,7 +9,6 @@ import './ai'
 export { freshRSSClient } from './freshrss'
 export { karakeepClient } from './karakeep'
 export { memosClient } from './memos'
-export { aiClient } from './ai'
 
 export * from './types'
 export * from './registry'

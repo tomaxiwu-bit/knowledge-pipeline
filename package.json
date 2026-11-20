@@ -25,6 +25,7 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:desktop": "electron tests/desktop-smoke.cjs",
     "test:backend": "cd server && uv run --locked --group test python -m pytest",
     "benchmark:retrieval": "cd server && uv run --locked python -m scripts.evaluate_retrieval",
     "verify": "npm run typecheck && npm run test && npm run test:backend && npm run build",
@@ -42,7 +43,6 @@
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
-    "@types/dompurify": "^3.0.5",
     "@vitejs/plugin-vue": "^6.0.8",
     "electron": "^43.1.1",
     "electron-builder": "^26.15.3",
@@ -52,6 +52,9 @@
     "vite-plugin-electron-renderer": "^1.0.0",
     "vitest": "^4.1.10",
     "vue-tsc": "^3.3.7"
+  },
+  "overrides": {
+    "katex": "$katex"
   },
   "build": {
     "appId": "com.knowledge-pipeline.app",

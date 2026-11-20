@@ -173,7 +173,7 @@ export const useSettingsStore = defineStore('settings', () => {
   /** 获取某个环节的第一个可用客户端 */
   function getClientByKind(kind: ServiceKind): RSSClient | BookmarkClient | MemoClient | AIClient | null {
     for (const svc of services.value) {
-      if (svc.kind === kind) {
+      if (svc.kind === kind && svc.configured) {
         const entry = clientMap.get(svc.id)
         if (entry) return entry.instance
       }
