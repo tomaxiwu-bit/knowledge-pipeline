@@ -20,11 +20,11 @@ const backlinks = computed(() => relationStore.getBacklinks(props.itemId))
 const forwardLinks = computed(() => relationStore.getForwardLinks(props.itemId))
 
 const typeIcon: Record<ItemType, string> = {
-  'rss': '📰',
-  'bookmark': '🔖',
-  'memo': '📝',
-  'note': '📄',
-  'ai-summary': '🤖'
+  'rss': 'R',
+  'bookmark': 'B',
+  'memo': 'M',
+  'note': 'D',
+  'ai-summary': 'AI'
 }
 
 function navigateTo(type: ItemType, id: string) {
@@ -44,7 +44,7 @@ function removeRelation(id: string) {
     <!-- 反向链接 -->
     <div class="link-section" v-if="backlinks.length > 0">
       <h4 class="section-title">
-        <span class="section-icon">↩️</span>
+        
         反向链接 ({{ backlinks.length }})
       </h4>
       <div class="link-list">
@@ -71,7 +71,7 @@ function removeRelation(id: string) {
     <!-- 正向链接 -->
     <div class="link-section" v-if="forwardLinks.length > 0">
       <h4 class="section-title">
-        <span class="section-icon">↪️</span>
+        
         正向链接 ({{ forwardLinks.length }})
       </h4>
       <div class="link-list">
@@ -97,7 +97,7 @@ function removeRelation(id: string) {
 
     <!-- 空状态 -->
     <div v-if="backlinks.length === 0 && forwardLinks.length === 0" class="empty-links">
-      <span class="empty-icon">🔗</span>
+      <span class="empty-icon">R</span>
       <p>暂无关联链接</p>
       <p class="empty-hint">保存笔记、收藏、生成摘要时会自动建立关联</p>
     </div>
@@ -151,7 +151,12 @@ function removeRelation(id: string) {
 }
 
 .link-icon {
-  font-size: 14px;
+  width: 15px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 

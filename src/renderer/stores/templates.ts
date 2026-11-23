@@ -20,7 +20,7 @@ const BUILT_IN_TEMPLATES: Template[] = [
   {
     id: 'tpl-daily',
     name: '每日笔记',
-    icon: '📅',
+    icon: 'calendar',
     category: 'daily',
     builtIn: true,
     body: `# {{date}} 每日笔记
@@ -40,7 +40,7 @@ const BUILT_IN_TEMPLATES: Template[] = [
   {
     id: 'tpl-reading',
     name: '阅读笔记',
-    icon: '📖',
+    icon: 'file',
     category: 'reading',
     builtIn: true,
     body: `# {{title}}
@@ -63,7 +63,7 @@ const BUILT_IN_TEMPLATES: Template[] = [
   {
     id: 'tpl-meeting',
     name: '会议纪要',
-    icon: '📋',
+    icon: 'note',
     category: 'meeting',
     builtIn: true,
     body: `# 会议纪要 - {{date}}
@@ -89,7 +89,7 @@ const BUILT_IN_TEMPLATES: Template[] = [
   {
     id: 'tpl-rss-digest',
     name: 'RSS 摘要',
-    icon: '📰',
+    icon: 'rss',
     category: 'rss',
     builtIn: true,
     body: `# RSS 周报 - {{date}}

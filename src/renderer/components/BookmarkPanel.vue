@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/renderer/stores/settings'
 import PanelLayout from '@/renderer/components/PanelLayout.vue'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import type { Bookmark, BookmarkClient } from '@/services/types'
 
 const router = useRouter()
@@ -119,21 +120,23 @@ onUnmounted(() => {
 <template>
   <PanelLayout
     title="链接收藏"
-    icon="🔖"
+    type="bookmark"
     :loading="loading"
     :error="error"
     :empty="isEmpty"
-    empty-icon="📭"
+    empty-icon="inbox"
     empty-text="暂无收藏"
     @refresh="loadItems"
     @goto-settings="router.push('/settings')"
   >
     <template #actions>
       <button class="btn btn-secondary" @click="openReadLaterDialog" title="添加稍后读链接，支持过期时间">
-        ⏰ 稍后读
+        <AppIcon name="clock" :size="14" />
+        稍后读
       </button>
       <button class="btn btn-secondary" @click="quickSaveFromClipboard" title="从剪贴板添加链接">
-        + 粘贴
+        <AppIcon name="plus" :size="14" />
+        粘贴
       </button>
       <span v-if="cacheStatus" class="cache-status">{{ cacheStatus }}</span>
     </template>
@@ -167,7 +170,7 @@ onUnmounted(() => {
     <!-- 稍后读对话框 -->
     <div v-if="showReadLaterDialog" class="rl-modal" @click.self="showReadLaterDialog = false">
       <div class="rl-card">
-        <h3>⏰ 添加稍后读</h3>
+        <h3>添加稍后读</h3>
         <div class="rl-form">
           <input v-model="readLaterUrl" type="url" placeholder="https:// 链接地址" class="rl-input" />
           <input v-model="readLaterTitle" type="text" placeholder="标题（可选）" class="rl-input" />
@@ -195,7 +198,7 @@ onUnmounted(() => {
 .item-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .cache-status {
@@ -204,8 +207,8 @@ onUnmounted(() => {
 }
 
 .list-item {
-  padding: 12px;
-  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -220,8 +223,8 @@ onUnmounted(() => {
 }
 
 .item-cover {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
@@ -232,26 +235,59 @@ onUnmounted(() => {
   min-width: 0;
 }
 
+.item-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .item-title {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  line-height: 1.4;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin-bottom: 3px;
+  line-height: 1.45;
+}
+
+.expiry-badge {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  color: var(--warning);
+  background: var(--warning-soft);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
 }
 
 .item-desc {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-secondary);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .item-tags {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.source-tag {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.source-tag.external {
+  color: var(--text-secondary);
 }
 </style>

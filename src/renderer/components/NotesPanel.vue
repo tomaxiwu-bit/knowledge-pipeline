@@ -93,18 +93,18 @@ onUnmounted(() => {
 <template>
   <PanelLayout
     title="速记笔记"
-    icon="📝"
+    type="note"
     :loading="loading"
     :error="error"
     :empty="isEmpty"
-    empty-icon="📭"
+    empty-icon="inbox"
     empty-text="还没有笔记，开始记录第一条吧"
     @refresh="loadItems"
     @goto-settings="router.push('/settings')"
   >
     <template #actions>
       <button class="btn btn-primary" @click="showInput = !showInput">
-        {{ showInput ? '取消' : '+ 新笔记' }}
+        {{ showInput ? '取消' : '新笔记' }}
       </button>
       <span v-if="cacheStatus" class="cache-status">{{ cacheStatus }}</span>
     </template>
@@ -168,18 +168,22 @@ onUnmounted(() => {
 .memo-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 }
 
 .memo-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  transition: background 0.15s;
+}
+
+.memo-card:hover {
+  background: var(--bg-surface-hover);
 }
 
 .memo-content {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
@@ -189,16 +193,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
 .memo-date {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
 .memo-tags {
   display: flex;
   flex-wrap: wrap;
+  gap: 4px;
 }
 </style>

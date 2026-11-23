@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AppIcon from '@/renderer/components/AppIcon.vue'
+
 defineProps<{
   title: string
   icon?: string
@@ -19,13 +21,14 @@ defineEmits<{
   <div class="panel">
     <div class="panel-header">
       <h2 class="panel-title">
-        <span v-if="icon" class="panel-icon">{{ icon }}</span>
+        <AppIcon v-if="icon" :name="icon" :size="16" class="panel-icon" />
         {{ title }}
       </h2>
       <div class="panel-actions">
         <slot name="actions" />
-        <button class="btn btn-secondary panel-refresh" @click="$emit('refresh')" :disabled="loading">
-          {{ loading ? '加载中...' : '刷新' }}
+        <button class="btn btn-ghost panel-refresh" @click="$emit('refresh')" :disabled="loading">
+          <AppIcon name="refresh" :size="14" />
+          {{ loading ? '加载中' : '刷新' }}
         </button>
       </div>
     </div>
@@ -36,7 +39,7 @@ defineEmits<{
 
     <div class="panel-body">
       <div v-if="error" class="empty-state">
-        <span class="empty-state-icon">⚠️</span>
+        <AppIcon name="inbox" :size="26" class="empty-state-icon" />
         <p>{{ error }}</p>
         <button class="btn btn-primary" style="margin-top: 12px" @click="$emit('goto-settings')">
           去配置
@@ -44,7 +47,7 @@ defineEmits<{
       </div>
 
       <div v-else-if="empty && !loading" class="empty-state">
-        <span class="empty-state-icon">{{ emptyIcon || '📭' }}</span>
+        <AppIcon :name="emptyIcon || 'inbox'" :size="26" class="empty-state-icon" />
         <p>{{ emptyText || '暂无内容' }}</p>
       </div>
 
@@ -66,37 +69,40 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-color);
   gap: 8px;
 }
 
 .panel-title {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.panel-icon {
-  font-size: 18px;
-}
-
-.panel-actions {
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+.panel-icon {
+  color: var(--text-muted);
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .panel-toolbar {
   padding: 10px 16px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
 }
 
 .panel-body {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 6px;
 }
 </style>

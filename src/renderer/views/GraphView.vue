@@ -11,6 +11,7 @@ import { runForceLayout, TYPE_COLORS, TYPE_ICONS, EDGE_COLORS } from '@/lib/grap
 import type { GraphNode, GraphEdge } from '@/lib/graph'
 import type { RSSItem, Bookmark, Memo, RSSClient, BookmarkClient, MemoClient } from '@/services/types'
 import type { ItemType } from '@/renderer/stores/relations'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
@@ -122,6 +123,23 @@ async function loadGraphData() {
   const height = viewBox.value.h
   await runForceLayout(nodes, edges, { width, height, iterations: 400 })
 
+  // 收窄视口到节点群范围并按画布比例扩展，让节点充满画布而不是缩在角落
+  if (nodes.length > 0) {
+    const minX = Math.min(...nodes.map((n) => n.x - n.radius))
+    const maxX = Math.max(...nodes.map((n) => n.x + n.radius))
+    const minY = Math.min(...nodes.map((n) => n.y - n.radius))
+    const maxY = Math.max(...nodes.map((n) => n.y + n.radius + 22))
+    const centerX = (minX + maxX) / 2
+    const centerY = (minY + maxY) / 2
+    const padding = 80
+    let boxW = Math.max(maxX - minX + padding * 2, 900)
+    let boxH = Math.max(maxY - minY + padding * 2, 540)
+    const ratio = 1.62
+    if (boxW / boxH < ratio) boxW = boxH * ratio
+    else boxH = boxW / ratio
+    viewBox.value = { x: centerX - boxW / 2, y: centerY - boxH / 2, w: boxW, h: boxH }
+  }
+
   graphNodes.value = nodes
   graphEdges.value = edges
   loading.value = false
@@ -132,7 +150,7 @@ function getNodeColor(type: string): string {
 }
 
 function getNodeIcon(type: string): string {
-  return TYPE_ICONS[type] || '📄'
+  return TYPE_ICONS[type] || 'D'
 }
 
 function getEdgeColor(kind: string): string {
@@ -179,13 +197,13 @@ onMounted(() => {
   <div class="graph-view">
     <div class="graph-header">
       <div class="graph-title">
-        <h2>🕸️ 知识图谱</h2>
+        <h2>知识图谱</h2>
         <span class="graph-stats" v-if="hasData">
           {{ graphNodes.length }} 节点 · {{ graphEdges.length }} 关系
         </span>
       </div>
       <button class="btn btn-secondary" @click="loadGraphData" :disabled="loading">
-        {{ loading ? '加载中...' : '🔄 刷新' }}
+        {{ loading ? '加载中...' : '刷新' }}
       </button>
     </div>
 
@@ -254,7 +272,6 @@ onMounted(() => {
       <div class="graph-legend">
         <div v-for="item in legendItems" :key="item.type" class="legend-item">
           <span class="legend-dot" :style="{ background: item.color }"></span>
-          <span class="legend-icon">{{ item.icon }}</span>
           <span class="legend-label">{{ item.label }}</span>
         </div>
       </div>
@@ -262,7 +279,10 @@ onMounted(() => {
       <!-- 节点详情面板 -->
       <div v-if="selectedNode" class="node-detail">
         <div class="detail-header">
-          <span class="detail-icon">{{ getNodeIcon(selectedNode.type) }}</span>
+          <span
+            class="detail-icon"
+            :style="{ color: getNodeColor(selectedNode.type), borderColor: getNodeColor(selectedNode.type) }"
+          >{{ getNodeIcon(selectedNode.type) }}</span>
           <div class="detail-title">
             <h4>{{ selectedNode.title }}</h4>
             <span class="detail-type">{{ legendItems.find(l => l.type === selectedNode?.type)?.label || selectedNode?.type }}</span>
@@ -289,7 +309,7 @@ onMounted(() => {
 
     <!-- 空状态 -->
     <div v-if="!loading && !hasData" class="empty-graph">
-      <span class="empty-icon">🕸️</span>
+      <AppIcon name="graph" :size="26" class="empty-icon" />
       <h3>暂无知识图谱</h3>
       <p>阅读文章时保存笔记、收藏链接、生成 AI 摘要，</p>
       <p>系统会自动建立条目间的关联，在此可视化展示。</p>
@@ -368,8 +388,26 @@ onMounted(() => {
 .node-label {
   pointer-events: none;
   user-select: none;
-  opacity: 0.7;
+  opacity: 0;
+  paint-order: stroke;
+  stroke: var(--bg-primary);
+  stroke-width: 3px;
+  stroke-linejoin: round;
   transition: opacity 0.2s;
+}
+
+/* 节点标签平时隐藏，悬停或选中时才展开，避免密集图谱里文字互相压住 */
+.node-group:hover .node-label,
+.node-group.selected .node-label {
+  opacity: 1;
+}
+
+.node-icon {
+  fill: rgba(255, 255, 255, 0.94);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
 }
 
 .node-group:hover .node-label {
@@ -430,7 +468,15 @@ onMounted(() => {
 }
 
 .detail-icon {
-  font-size: 24px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
   flex-shrink: 0;
 }
 

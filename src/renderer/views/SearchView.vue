@@ -6,6 +6,7 @@ import { useSettingsStore } from '@/renderer/stores/settings'
 import { useTagStore } from '@/renderer/stores/tags'
 import { useSavedSearchStore } from '@/renderer/stores/savedSearches'
 import TagFilter from '@/renderer/components/TagFilter.vue'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 
 const searchStore = useSearchStore()
 const settingsStore = useSettingsStore()
@@ -17,9 +18,9 @@ const showSaveDialog = ref(false)
 const newSearchName = ref('')
 
 const typeLabel: Record<string, string> = {
-  rss: '📰 RSS',
-  bookmark: '🔖 收藏',
-  memo: '📝 笔记'
+  rss: 'RSS',
+  bookmark: '收藏',
+  memo: '笔记'
 }
 
 function openResult(result: { type: string; id: string }) {
@@ -121,7 +122,7 @@ onUnmounted(() => {
         <!-- 保存的搜索列表 -->
         <div class="saved-searches-section">
           <div class="saved-header">
-            <h4 class="saved-title">💾 智能集合</h4>
+            <h4 class="saved-title">智能集合</h4>
             <span class="saved-count" v-if="savedSearchStore.searchCount > 0">
               {{ savedSearchStore.searchCount }}
             </span>
@@ -159,7 +160,7 @@ onUnmounted(() => {
       <!-- 右侧：搜索 + 结果 -->
       <div class="search-container">
         <div class="search-header">
-          <h1>🔍 全局搜索</h1>
+          <h1>全局搜索</h1>
           <p class="search-desc">同时搜索 RSS 文章、链接收藏、速记笔记三个来源</p>
         </div>
 
@@ -184,7 +185,7 @@ onUnmounted(() => {
             @click="showSaveDialog = true"
             title="保存当前搜索条件"
           >
-            💾 保存
+            保存
           </button>
         </div>
 
@@ -198,13 +199,13 @@ onUnmounted(() => {
 
         <!-- 当前激活的智能集合提示 -->
         <div v-if="savedSearchStore.activeSearch" class="active-smart-collection">
-          <span class="smart-badge">🤖 智能集合</span>
+          <span class="smart-badge">智能集合</span>
           <span class="smart-name">{{ savedSearchStore.activeSearch.name }}</span>
           <button class="smart-clear" @click="savedSearchStore.setActive(null)">×</button>
         </div>
 
         <div v-if="!hasAnySource" class="empty-state">
-          <span class="empty-state-icon">⚠️</span>
+          <AppIcon name="alert" :size="26" class="empty-state-icon" />
           <p>尚未配置任何数据源，请先去设置页配置</p>
           <button class="btn btn-primary" style="margin-top: 12px" @click="router.push('/settings')">
             去配置
@@ -212,7 +213,7 @@ onUnmounted(() => {
         </div>
 
         <div v-else-if="searchStore.searched && !searchStore.loading && filteredResults.length === 0" class="empty-state">
-          <span class="empty-state-icon">🔍</span>
+          <AppIcon name="search" :size="26" class="empty-state-icon" />
           <p v-if="tagStore.selectedTags.length > 0">
             未找到匹配 "{{ searchStore.query }}" 且带选中标签的结果
           </p>
@@ -249,7 +250,7 @@ onUnmounted(() => {
     <!-- 保存搜索对话框 -->
     <div v-if="showSaveDialog" class="save-modal" @click.self="showSaveDialog = false">
       <div class="save-card">
-        <h3>💾 保存为智能集合</h3>
+        <h3>保存为智能集合</h3>
         <div class="save-form">
           <label class="save-label">名称</label>
           <input

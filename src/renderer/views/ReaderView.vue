@@ -10,6 +10,7 @@ import { knowledgeClient } from '@/renderer/services/ragClient'
 import { exportAsMarkdown, exportAsHTML } from '@/lib/export'
 import ArticleOutline from '@/renderer/components/ArticleOutline.vue'
 import BacklinkPanel from '@/renderer/components/BacklinkPanel.vue'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import type { RSSClient, BookmarkClient, MemoClient, AIClient, AISummary } from '@/services/types'
 import type { InquirySourceRole } from '@/lib/inquiry'
 
@@ -349,31 +350,42 @@ onMounted(async () => {
 <template>
   <div class="reader-view">
     <div class="reader-toolbar">
-      <button class="btn btn-secondary" @click="router.back()">← 返回</button>
+      <button class="btn btn-ghost toolbar-back" @click="router.back()">
+        <AppIcon name="chevron-left" :size="15" />
+        返回
+      </button>
       <div class="toolbar-actions">
-        <button v-if="hasAIClient" class="btn btn-secondary" @click="generateSummary" :disabled="summarizing" title="AI 生成摘要">
-          {{ summarizing ? '🤖 生成中...' : '🤖 AI 摘要' }}
+        <button v-if="hasAIClient" class="btn btn-ghost" @click="generateSummary" :disabled="summarizing" title="AI 生成摘要">
+          <AppIcon name="robot" :size="15" />
+          {{ summarizing ? '生成中' : 'AI 摘要' }}
         </button>
-        <button class="btn btn-secondary" @click="bookmarkThis" title="收藏">
-          🔖 收藏
+        <button class="btn btn-ghost" @click="bookmarkThis" title="收藏">
+          <AppIcon name="bookmark" :size="15" />
+          收藏
         </button>
-        <button class="btn btn-secondary" @click="showManualInput = true" title="手动输入内容存到笔记">
-          ✍️ 手动记
+        <button class="btn btn-ghost" @click="showManualInput = true" title="手动输入内容存到笔记">
+          <AppIcon name="pen" :size="15" />
+          手动记
         </button>
-        <button class="btn btn-secondary" @click="openInquiryDialog" title="将当前材料加入问题驱动的探究线">
-          🧭 加入探究线
+        <button class="btn btn-ghost" @click="openInquiryDialog" title="将当前材料加入问题驱动的探究线">
+          <AppIcon name="compass" :size="15" />
+          加入探究线
         </button>
-        <button class="btn btn-secondary" @click="addToKnowledge" :disabled="indexing" title="向本地 RAG 知识库建立索引">
-          {{ indexing ? '🧠 入库中...' : '🧠 加入知识库' }}
+        <button class="btn btn-ghost" @click="addToKnowledge" :disabled="indexing" title="向本地 RAG 知识库建立索引">
+          <AppIcon name="brain" :size="15" />
+          {{ indexing ? '入库中' : '加入知识库' }}
         </button>
-        <button class="btn btn-secondary" @click="exportMarkdown" title="导出为 Markdown 文件">
-          📄 .md
+        <button class="btn btn-ghost" @click="exportMarkdown" title="导出为 Markdown 文件">
+          <AppIcon name="file" :size="15" />
+          Markdown
         </button>
-        <button class="btn btn-secondary" @click="exportHTML" title="导出为 HTML 文件">
-          🌐 .html
+        <button class="btn btn-ghost" @click="exportHTML" title="导出为 HTML 文件">
+          <AppIcon name="globe" :size="15" />
+          HTML
         </button>
         <button class="btn btn-primary" @click="saveHighlightToMemos" title="选中文字后保存到笔记">
-          ✏️ 存笔记
+          <AppIcon name="note" :size="15" />
+          存笔记
         </button>
       </div>
     </div>
@@ -389,7 +401,7 @@ onMounted(async () => {
 
     <div v-if="summary" class="summary-panel">
       <div class="summary-header">
-        <h3>🤖 AI 摘要</h3>
+        <h3><AppIcon name="robot" :size="15" /> AI 摘要</h3>
         <div class="summary-actions">
           <button class="btn btn-secondary btn-sm" @click="saveSummaryToMemo">存到笔记</button>
           <button class="btn btn-secondary btn-sm" @click="summary = null">关闭</button>
@@ -434,7 +446,7 @@ onMounted(async () => {
 
     <div v-if="showInquiryDialog" class="highlight-modal" @click.self="showInquiryDialog = false">
       <div class="modal-content inquiry-modal">
-        <h3>🧭 加入探究线</h3>
+        <h3>加入探究线</h3>
         <p class="inquiry-modal-desc">不要只收藏材料：说明它是支持证据、反例、背景，还是你的想法。</p>
         <label class="inquiry-field">
           <span>探究线</span>
@@ -479,15 +491,20 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--border-color);
   flex-wrap: wrap;
   gap: 8px;
+  background: var(--bg-primary);
+}
+
+.toolbar-back {
+  margin-right: auto;
 }
 
 .toolbar-actions {
   display: flex;
-  gap: 8px;
+  gap: 2px;
   flex-wrap: wrap;
 }
 
@@ -542,7 +559,10 @@ onMounted(async () => {
 }
 
 .summary-header h3 {
-  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--accent);
 }
@@ -568,8 +588,8 @@ onMounted(async () => {
 .reader-article {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 48px 64px;
-  max-width: 760px;
+  padding: 44px 52px 80px;
+  max-width: 768px;
   margin: 0 auto;
   width: 100%;
 }
@@ -590,27 +610,28 @@ onMounted(async () => {
 }
 
 .article-title {
-  font-size: 26px;
+  font-size: 30px;
+  font-family: var(--font-sans);
   font-weight: 700;
-  margin-bottom: 12px;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+  line-height: 1.32;
+  letter-spacing: -0.022em;
 }
 
 .article-meta {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .article-url {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--accent);
 }
 
 .article-content {
-  font-size: 16px;
-  line-height: 1.85;
+  font-size: 16.5px;
+  line-height: 1.9;
   color: var(--text-primary);
   font-family: var(--font-reading);
 }

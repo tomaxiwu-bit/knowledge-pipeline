@@ -7,6 +7,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCommandRegistry, type Command } from '@/renderer/composables/useCommandRegistry'
 import { useSearchStore } from '@/renderer/stores/search'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 
 const props = defineProps<{
   visible: boolean
@@ -53,9 +54,15 @@ const categoryLabel: Record<Command['category'], string> = {
 }
 
 const typeLabel: Record<string, string> = {
-  rss: '📰 RSS',
-  bookmark: '🔖 收藏',
-  memo: '📝 笔记'
+  rss: 'RSS',
+  bookmark: '收藏',
+  memo: '笔记'
+}
+
+const typeIcon: Record<string, string> = {
+  rss: 'rss',
+  bookmark: 'bookmark',
+  memo: 'note'
 }
 
 // 监听查询变化
@@ -161,7 +168,7 @@ onUnmounted(() => {
               @mouseenter="selectedIndex = idx"
             >
               <template v-if="item.type === 'command'">
-                <span class="item-icon">{{ item.data.icon ?? '▸' }}</span>
+                <span class="item-icon"><AppIcon :name="item.data.icon ?? 'dot'" :size="15" /></span>
                 <div class="item-body">
                   <span class="item-title">{{ item.data.title }}</span>
                   <span v-if="item.data.description" class="item-desc">{{ item.data.description }}</span>
@@ -170,7 +177,7 @@ onUnmounted(() => {
                 <kbd v-if="item.data.shortcut" class="item-shortcut">{{ item.data.shortcut }}</kbd>
               </template>
               <template v-else>
-                <span class="item-icon">{{ typeLabel[item.data.type]?.slice(0, 2) ?? '📄' }}</span>
+                <span class="item-icon"><AppIcon :name="typeIcon[item.data.type] ?? 'file'" :size="15" /></span>
                 <div class="item-body">
                   <span class="item-title">{{ item.data.title }}</span>
                   <span class="item-desc">{{ item.data.snippet }}</span>
@@ -182,7 +189,7 @@ onUnmounted(() => {
         </div>
 
         <div v-else class="palette-empty">
-          <span class="empty-icon">🔍</span>
+          <AppIcon name="search" :size="26" class="empty-icon" />
           <p v-if="query.trim().length >= 2 && searchStore.loading">搜索中...</p>
           <p v-else-if="query.trim().length >= 2">未找到匹配 "{{ query }}" 的内容</p>
           <p v-else>输入命令名或关键词开始</p>
@@ -215,12 +222,12 @@ onUnmounted(() => {
 }
 
 .palette-panel {
-  width: 640px;
+  width: 620px;
   max-width: 90%;
-  background: var(--bg-surface);
+  background: var(--bg-elevated);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -279,10 +286,10 @@ onUnmounted(() => {
 .palette-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-align: left;
   transition: background 0.1s;
@@ -297,10 +304,17 @@ onUnmounted(() => {
 }
 
 .item-icon {
-  font-size: 16px;
-  width: 24px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.palette-item.selected .item-icon {
+  color: var(--accent);
 }
 
 .item-body {
@@ -308,11 +322,11 @@ onUnmounted(() => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .item-title {
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-primary);
   font-weight: 500;
   white-space: nowrap;
@@ -321,7 +335,7 @@ onUnmounted(() => {
 }
 
 .item-desc {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -329,10 +343,11 @@ onUnmounted(() => {
 }
 
 .item-category {
-  font-size: 11px;
-  padding: 2px 8px;
-  background: var(--bg-surface-hover);
-  border-radius: 999px;
+  font-size: 10.5px;
+  padding: 1px 7px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -353,9 +368,8 @@ onUnmounted(() => {
 }
 
 .empty-icon {
-  font-size: 32px;
   display: block;
-  margin-bottom: 8px;
+  margin: 0 auto 8px;
 }
 
 .palette-footer {

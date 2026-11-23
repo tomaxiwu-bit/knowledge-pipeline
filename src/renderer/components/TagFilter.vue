@@ -28,7 +28,7 @@ const topTags = computed(() => {
 <template>
   <div class="tag-filter" :class="{ compact }">
     <div class="tag-filter-header">
-      <h3 class="filter-title">🏷️ 标签</h3>
+      <h3 class="filter-title">标签</h3>
       <button
         v-if="tagStore.selectedTags.length > 0"
         class="btn btn-secondary btn-sm"

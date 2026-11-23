@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useSettingsStore } from '@/renderer/stores/settings'
-import { listAllAdapters, KIND_LABELS, KIND_ICONS, getAdapterMeta } from '@/services/registry'
+import { listAllAdapters, KIND_LABELS, getAdapterMeta } from '@/services/registry'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import { createBackup, parseBackup, fetchKnowledgeBaseForBackup } from '@/lib/backup'
 import '@/services'
 import type { ServiceKind, ServiceInstance, AdapterMeta, ConnectionResult } from '@/services/types'
@@ -9,6 +10,9 @@ import type { ServiceKind, ServiceInstance, AdapterMeta, ConnectionResult } from
 const settingsStore = useSettingsStore()
 
 const allAdapters = listAllAdapters()
+
+const KIND_ICON_NAMES: Record<string, string> = { rss: 'rss', bookmark: 'bookmark', memo: 'note', ai: 'robot' }
+const kindIcon = (kind: string) => KIND_ICON_NAMES[kind] ?? 'layers'
 const showAddDialog = ref(false)
 const selectedKind = ref<ServiceKind | null>(null)
 const testing = ref<string | null>(null) // instance.id
@@ -273,7 +277,7 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
         <p v-if="kind === 'ai'" class="field-help">摘要和知识库问答使用列表中第一个已配置的 AI 服务。摘要原文、问题及检索片段会发送到该 API；索引仍保存在本机。切换服务类型会清空表单密钥。</p>
         <div class="kind-header">
           <h2>
-            <span class="kind-icon">{{ KIND_ICONS[kind] }}</span>
+            <span class="kind-icon"><AppIcon :name="kindIcon(kind)" :size="17" /></span>
             {{ KIND_LABELS[kind] }}
           </h2>
           <button class="btn btn-primary btn-sm" @click="startAdd(kind)">
@@ -326,7 +330,7 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
 
       <section class="rag-section">
         <div>
-          <h3>🧠 本地知识问答服务</h3>
+          <h3>本地知识问答服务</h3>
           <p>桌面应用通过受限的主进程代理连接本机 FastAPI 服务；知识正文保存在 SQLite，向量索引保存在 Chroma。默认地址无需修改。</p>
         </div>
         <div class="rag-controls">
@@ -475,7 +479,8 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
 }
 
 .kind-icon {
-  font-size: 20px;
+  display: flex;
+  color: var(--text-muted);
 }
 
 .kind-empty {

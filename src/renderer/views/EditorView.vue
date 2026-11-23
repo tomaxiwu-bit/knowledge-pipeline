@@ -6,6 +6,7 @@ import { useTemplateStore } from '@/renderer/stores/templates'
 import { renderMarkdown, renderAsyncContent } from '@/lib/markdown'
 import { exportAsMarkdown, exportAsHTML } from '@/lib/export'
 import TemplatePicker from '@/renderer/components/TemplatePicker.vue'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import type { Memo, MemoClient } from '@/services/types'
 
 const settingsStore = useSettingsStore()
@@ -191,22 +192,22 @@ onUnmounted(() => {
   <div class="editor-view">
     <div class="editor-toolbar">
       <div class="toolbar-left">
-        <button class="format-btn" @click="openTemplatePicker" title="从模板新建">📋</button>
+        <button class="format-btn" @click="openTemplatePicker" title="从模板新建"><AppIcon name="file" :size="15" /></button>
         <button class="format-btn" @click="insertFormatting('h1')" title="标题1">H1</button>
         <button class="format-btn" @click="insertFormatting('h2')" title="标题2">H2</button>
         <button class="format-btn" @click="insertFormatting('bold')" title="粗体">B</button>
         <button class="format-btn" @click="insertFormatting('italic')" title="斜体">I</button>
         <button class="format-btn" @click="insertFormatting('quote')" title="引用">"</button>
         <button class="format-btn" @click="insertFormatting('code')" title="代码">&lt;/&gt;</button>
-        <button class="format-btn" @click="insertFormatting('link')" title="链接">🔗</button>
+        <button class="format-btn" @click="insertFormatting('link')" title="链接"><AppIcon name="link" :size="15" /></button>
       </div>
       <div class="toolbar-right">
         <span v-if="savedStatus" class="saved-status">{{ savedStatus }}</span>
         <button class="btn btn-secondary" @click="showInsertPanel = !showInsertPanel">
-          📝 引用笔记
+          引用笔记
         </button>
-        <button class="btn btn-secondary" @click="exportMarkdown" title="导出 Markdown">📄 .md</button>
-        <button class="btn btn-secondary" @click="exportHTML" title="导出 HTML">🌐 .html</button>
+        <button class="btn btn-secondary" @click="exportMarkdown" title="导出 Markdown">.md</button>
+        <button class="btn btn-secondary" @click="exportHTML" title="导出 HTML">.html</button>
         <button class="btn btn-secondary" @click="copyToClipboard">复制</button>
         <button class="btn btn-primary" @click="saveAsMemo">存到 Memos</button>
       </div>

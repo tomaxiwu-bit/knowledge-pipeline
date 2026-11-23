@@ -4,6 +4,7 @@
 
 import { ref, computed } from 'vue'
 import { useTemplateStore, type Template } from '@/renderer/stores/templates'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 
 const props = defineProps<{
   visible: boolean
@@ -66,7 +67,7 @@ function back() {
         <!-- 模板列表 -->
         <div v-if="!selectedTemplate" class="picker-list">
           <div class="picker-header">
-            <h2>📋 选择模板</h2>
+            <h2>选择模板</h2>
             <button class="btn btn-secondary btn-sm" @click="emit('close')">✕</button>
           </div>
           <div class="template-grid">
@@ -76,7 +77,7 @@ function back() {
               class="template-card"
               @click="selectTemplate(tpl)"
             >
-              <span class="tpl-icon">{{ tpl.icon }}</span>
+              <AppIcon :name="tpl.icon" :size="18" class="tpl-icon" />
               <span class="tpl-name">{{ tpl.name }}</span>
               <span class="tpl-category">{{ categoryLabel[tpl.category] }}</span>
             </button>
@@ -87,7 +88,7 @@ function back() {
         <div v-else class="picker-detail">
           <div class="picker-header">
             <button class="btn btn-secondary btn-sm" @click="back">← 返回</button>
-            <h2>{{ selectedTemplate.icon }} {{ selectedTemplate.name }}</h2>
+            <h2 class="detail-title"><AppIcon :name="selectedTemplate.icon" :size="16" /> {{ selectedTemplate.name }}</h2>
           </div>
 
           <div v-if="varsList.length > 0" class="vars-section">

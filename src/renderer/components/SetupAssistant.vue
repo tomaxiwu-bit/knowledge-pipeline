@@ -2,15 +2,16 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/renderer/stores/settings'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import type { ServiceKind } from '@/services/types'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
 
 const stages: Array<{ kind: ServiceKind; icon: string; title: string; description: string }> = [
-  { kind: 'rss', icon: '📰', title: '连接信息源', description: '导入待阅读文章' },
-  { kind: 'bookmark', icon: '🔖', title: '连接收藏夹', description: '保留值得回看的链接' },
-  { kind: 'memo', icon: '📝', title: '连接速记本', description: '把想法沉淀为笔记' }
+  { kind: 'rss', icon: 'rss', title: '连接信息源', description: '导入待阅读文章' },
+  { kind: 'bookmark', icon: 'bookmark', title: '连接收藏夹', description: '保留值得回看的链接' },
+  { kind: 'memo', icon: 'note', title: '连接速记本', description: '把想法沉淀为笔记' }
 ]
 
 const progress = computed(() => stages.map((stage) => ({
@@ -32,7 +33,9 @@ const isComplete = computed(() => completeCount.value === stages.length)
 
     <div class="setup-steps" aria-label="配置进度">
       <div v-for="stage in progress" :key="stage.kind" class="setup-step" :class="{ complete: stage.complete }">
-        <span class="setup-icon" aria-hidden="true">{{ stage.complete ? '✓' : stage.icon }}</span>
+        <span class="setup-icon" aria-hidden="true">
+          <AppIcon :name="stage.complete ? 'check' : stage.icon" :size="17" />
+        </span>
         <div>
           <strong>{{ stage.title }}</strong>
           <span>{{ stage.complete ? '已连接' : stage.description }}</span>

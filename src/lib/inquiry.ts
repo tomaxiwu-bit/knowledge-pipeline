@@ -35,12 +35,6 @@ export const INQUIRY_ROLE_LABELS: Record<InquirySourceRole, string> = {
   reflection: '自己的想法'
 }
 
-export const INQUIRY_SOURCE_ICONS: Record<InquirySourceType, string> = {
-  rss: '📰',
-  bookmark: '🔖',
-  memo: '📝'
-}
-
 const SOURCE_TYPES = new Set<InquirySourceType>(['rss', 'bookmark', 'memo'])
 const SOURCE_ROLES = new Set<InquirySourceRole>(['evidence', 'counterpoint', 'context', 'reflection'])
 
@@ -132,7 +126,7 @@ function escapeMarkdownLinkText(value: string): string {
 }
 
 function formatSource(source: InquirySource): string[] {
-  const heading = `### ${INQUIRY_SOURCE_ICONS[source.sourceType]} ${INQUIRY_ROLE_LABELS[source.role]}`
+  const heading = `### ${INQUIRY_ROLE_LABELS[source.role]}`
   const url = safeHttpUrl(source.url)
   const reference = url
     ? `- [${escapeMarkdownLinkText(source.title)}](${url})`

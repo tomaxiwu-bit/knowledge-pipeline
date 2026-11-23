@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { buildInquiryBrief, INQUIRY_ROLE_LABELS, INQUIRY_SOURCE_ICONS } from '@/lib/inquiry'
+import { buildInquiryBrief, INQUIRY_ROLE_LABELS } from '@/lib/inquiry'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import { exportAsMarkdown } from '@/lib/export'
 import { useInquiryThreadStore } from '@/renderer/stores/inquiryThreads'
 import { useSettingsStore } from '@/renderer/stores/settings'
@@ -175,7 +176,7 @@ onMounted(async () => {
           <h2>{{ activeThread.title }}</h2>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" @click="exportBrief">📄 导出简报</button>
+          <button class="btn btn-secondary" @click="exportBrief">导出简报</button>
           <button class="btn btn-secondary danger-action" @click="deleteThread">删除</button>
         </div>
       </header>
@@ -211,7 +212,6 @@ onMounted(async () => {
         <div v-if="activeThread.sources.length" class="source-list">
           <article v-for="source in activeThread.sources" :key="source.id" class="source-card">
             <div class="source-role">
-              <span>{{ INQUIRY_SOURCE_ICONS[source.sourceType] }}</span>
               {{ INQUIRY_ROLE_LABELS[source.role] }}
             </div>
             <div class="source-body">
@@ -223,7 +223,7 @@ onMounted(async () => {
           </article>
         </div>
         <div v-else class="materials-empty">
-          <span>🧭</span>
+          <AppIcon name="inbox" :size="22" class="empty-glyph" />
           <p>从一篇文章或收藏开始：它不必立刻支持你的判断，也可以是一个值得保留的反例。</p>
         </div>
       </section>
@@ -235,14 +235,14 @@ onMounted(async () => {
         </div>
         <textarea v-model="reflection" class="form-input" rows="3" placeholder="我现在怎么看？有什么不确定？"></textarea>
         <button class="btn btn-secondary" :disabled="!reflection.trim() || !hasMemoService" @click="addReflection">
-          📝 保存想法
+          保存想法
         </button>
         <p v-if="!hasMemoService" class="service-hint">需要先配置 Memos 等速记服务。</p>
       </section>
     </main>
 
     <main v-else class="inquiry-empty">
-      <span>🧭</span>
+      <AppIcon name="compass" :size="40" class="empty-glyph" />
       <h2>从一个值得回答的问题开始</h2>
       <p>探究线不是文件夹，也不是图谱。它帮助你留下“为什么收集、现在怎么判断、下一步做什么”。</p>
     </main>
@@ -285,6 +285,7 @@ onMounted(async () => {
 .section-heading p, .reflection-card p { margin-top: 4px; color: var(--text-secondary); font-size: 12px; }
 .source-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .source-card { display: flex; gap: 12px; align-items: flex-start; padding: 13px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-primary); }
+.empty-glyph { color: var(--text-muted); }
 .source-role { min-width: 104px; color: var(--accent); font-size: 12px; font-weight: 600; }
 .source-body { min-width: 0; flex: 1; }
 .source-title { max-width: 100%; padding: 0; background: none; color: var(--text-primary); font-size: 14px; font-weight: 600; text-align: left; }

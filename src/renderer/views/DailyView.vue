@@ -4,6 +4,7 @@
 // 与现有 Memos 后端整合，按 createdAt 过滤当天笔记
 
 import { ref, computed, onMounted } from 'vue'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/renderer/stores/settings'
 import type { Memo, MemoClient } from '@/services/types'
@@ -172,7 +173,7 @@ onMounted(async () => {
         <div class="date-display">
           <h1 class="date-title">{{ formatDisplay(selectedDate) }}</h1>
           <button class="btn btn-primary" @click="showInput = !showInput">
-            {{ showInput ? '取消' : '✍️ 记一笔' }}
+            {{ showInput ? '取消' : '记一笔' }}
           </button>
         </div>
 
@@ -198,13 +199,13 @@ onMounted(async () => {
         </div>
 
         <div v-if="error" class="daily-error">
-          <span class="error-icon">⚠️</span>
+          <AppIcon name="alert" :size="26" class="error-icon" />
           <p>{{ error }}</p>
           <button class="btn btn-primary" @click="router.push('/settings')">去配置</button>
         </div>
 
         <div v-if="isEmpty" class="daily-empty">
-          <span class="empty-icon">📅</span>
+          <AppIcon name="calendar" :size="26" class="empty-icon" />
           <p>这一天还没有笔记</p>
           <button class="btn btn-primary" @click="showInput = true">开始记录</button>
         </div>

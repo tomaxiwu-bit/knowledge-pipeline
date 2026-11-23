@@ -26,7 +26,7 @@ const depth = props.depth ?? 0
       :style="{ paddingLeft: `${12 + depth * 16}px` }"
       @click="emit('toggle', node.name)"
     >
-      <span class="tree-tag-icon">{{ node.children.length > 0 ? '📂' : '🏷️' }}</span>
+      <span class="tree-tag-icon">{{ node.children.length > 0 ? '▸' : '#' }}</span>
       <span class="tree-tag-name">{{ node.shortName }}</span>
       <span class="tree-tag-count">{{ node.count }}</span>
     </button>

@@ -173,13 +173,13 @@ export const TYPE_COLORS: Record<string, string> = {
   'ai-summary': '#ec4899'  // 粉色
 }
 
-/** 节点类型图标映射 */
+/** 节点类型标记（单字母，在 SVG 节点内以无衬线字体呈现，避免彩色 emoji） */
 export const TYPE_ICONS: Record<string, string> = {
-  'rss': '📰',
-  'bookmark': '🔖',
-  'memo': '📝',
-  'note': '📄',
-  'ai-summary': '🤖'
+  'rss': 'R',
+  'bookmark': 'B',
+  'memo': 'M',
+  'note': 'D',
+  'ai-summary': 'AI'
 }
 
 /** 边类型颜色映射 */

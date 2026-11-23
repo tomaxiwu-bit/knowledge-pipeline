@@ -2,28 +2,32 @@
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/renderer/stores/settings'
 import { useCommandRegistry } from '@/renderer/composables/useCommandRegistry'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const { openPalette } = useCommandRegistry()
 
 const navItems = [
-  { name: 'home', label: '流水线', icon: '🏠', path: '/' },
-  { name: 'daily', label: '每日笔记', icon: '📅', path: '/daily' },
-  { name: 'search', label: '搜索', icon: '🔍', path: '/search' },
-  { name: 'inquiry', label: '探究线', icon: '🧭', path: '/inquiry' },
-  { name: 'knowledge', label: '知识问答', icon: '🧠', path: '/knowledge' },
-  { name: 'graph', label: '知识图谱', icon: '🕸️', path: '/graph' },
-  { name: 'editor', label: '写作', icon: '✏️', path: '/editor' },
-  { name: 'settings', label: '设置', icon: '⚙️', path: '/settings' }
+  { name: 'home', label: '流水线', icon: 'home', path: '/' },
+  { name: 'daily', label: '每日笔记', icon: 'calendar', path: '/daily' },
+  { name: 'search', label: '搜索', icon: 'search', path: '/search' },
+  { name: 'inquiry', label: '探究线', icon: 'compass', path: '/inquiry' },
+  { name: 'knowledge', label: '知识问答', icon: 'brain', path: '/knowledge' },
+  { name: 'graph', label: '知识图谱', icon: 'graph', path: '/graph' },
+  { name: 'editor', label: '写作', icon: 'pen', path: '/editor' },
+  { name: 'settings', label: '设置', icon: 'settings', path: '/settings' }
 ]
 </script>
 
 <template>
   <nav class="sidebar">
     <div class="sidebar-header">
-      <span class="sidebar-logo">📚</span>
-      <span class="sidebar-title">知识流水线</span>
+      <span class="logo-mark"><AppIcon name="layers" :size="16" /></span>
+      <div class="brand">
+        <span class="sidebar-title">知识流水线</span>
+        <span class="sidebar-sub">Knowledge Pipeline</span>
+      </div>
     </div>
 
     <div class="sidebar-nav">
@@ -34,7 +38,7 @@ const navItems = [
         :class="{ active: $route.name === item.name }"
         @click="router.push(item.path)"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <AppIcon :name="item.icon" :size="17" class="nav-icon" />
         <span class="nav-label">{{ item.label }}</span>
       </button>
     </div>
@@ -42,7 +46,7 @@ const navItems = [
     <button class="palette-btn" @click="openPalette" title="打开命令面板 (Ctrl+K)">
       <span class="palette-btn-icon">⌘</span>
       <span class="palette-btn-text">命令面板</span>
-      <kbd class="palette-btn-kbd">Ctrl+K</kbd>
+      <kbd class="palette-btn-kbd">Ctrl K</kbd>
     </button>
 
     <div class="sidebar-footer">
@@ -51,7 +55,7 @@ const navItems = [
         @click="settingsStore.toggleTheme"
         :title="settingsStore.theme === 'dark' ? '切换到亮色' : '切换到暗色'"
       >
-        <span class="theme-icon">{{ settingsStore.theme === 'dark' ? '☀️' : '🌙' }}</span>
+        <AppIcon :name="settingsStore.theme === 'dark' ? 'sun' : 'moon'" :size="15" />
         <span class="theme-label">{{ settingsStore.theme === 'dark' ? '亮色' : '暗色' }}</span>
       </button>
       <span class="version">v0.3.1</span>
@@ -61,8 +65,8 @@ const navItems = [
 
 <style scoped>
 .sidebar {
-  width: 200px;
-  min-width: 200px;
+  width: 216px;
+  min-width: 216px;
   background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
@@ -70,39 +74,63 @@ const navItems = [
 }
 
 .sidebar-header {
-  padding: 20px 16px;
+  padding: 18px 16px 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid var(--border-color);
+  gap: 10px;
 }
 
-.sidebar-logo {
-  font-size: 20px;
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent-contrast);
+  background: linear-gradient(145deg, var(--accent), var(--accent-hover));
+  box-shadow: var(--shadow-sm);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
 }
 
 .sidebar-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
+}
+
+.sidebar-sub {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 12px 8px;
+  padding: 4px 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  overflow-y: auto;
 }
 
 .nav-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   background: transparent;
+  border-radius: var(--radius-sm);
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   text-align: left;
   width: 100%;
 }
@@ -115,16 +143,31 @@ const navItems = [
 .nav-item.active {
   background: var(--accent-soft);
   color: var(--accent);
+  font-weight: 500;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--accent);
 }
 
 .nav-icon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
+  opacity: 0.9;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
 }
 
 .sidebar-footer {
-  padding: 12px 16px;
+  padding: 10px 14px 12px;
   border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -133,29 +176,29 @@ const navItems = [
 }
 
 .palette-btn {
-  margin: 0 8px;
-  padding: 8px 12px;
+  margin: 0 10px 8px;
+  padding: 7px 10px;
   display: flex;
   align-items: center;
   gap: 8px;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s;
-  width: calc(100% - 16px);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 
 .palette-btn:hover {
   background: var(--bg-surface-hover);
-  border-color: var(--border-active);
+  border-color: var(--border-strong);
   color: var(--text-primary);
 }
 
 .palette-btn-icon {
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-secondary);
 }
 
 .palette-btn-text {
@@ -164,10 +207,13 @@ const navItems = [
 }
 
 .palette-btn-kbd {
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
   padding: 2px 5px;
-  background: var(--bg-surface-hover);
-  border-radius: 3px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
   color: var(--text-muted);
 }
 
@@ -178,7 +224,7 @@ const navItems = [
   background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
-  padding: 4px 8px;
+  padding: 5px 8px;
   border-radius: var(--radius-sm);
 }
 
@@ -187,12 +233,9 @@ const navItems = [
   color: var(--text-primary);
 }
 
-.theme-icon {
-  font-size: 14px;
-}
-
 .version {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   color: var(--text-muted);
 }
 </style>

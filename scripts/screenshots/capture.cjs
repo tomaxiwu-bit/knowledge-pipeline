@@ -83,13 +83,33 @@ async function seedSettings() {
   })()`)
 }
 
-async function capture(name) {
-  await sleep(450)
-  const image = await win.webContents.capturePage()
+/** 截图前确认目标视图确实可见，避免路由切换未完成时截到上一页。 */
+const VIEW_SELECTORS = [
+  '.graph-view', '.reader-view', '.knowledge-view', '.inquiry-view',
+  '.settings-view', '.daily-view', '.editor-view', '.search-view'
+]
+
+async function visibleView() {
+  return evaluate(`(() => {
+    const visible = [...document.querySelectorAll(${JSON.stringify(VIEW_SELECTORS.join(','))})]
+      .filter((el) => el.offsetParent !== null || el.getClientRects().length > 0)
+      .map((el) => el.className.split(' ')[0])
+    return { hash: location.hash, visible }
+  })()`)
+}
+
+async function capture(name, selector) {
+  if (selector) await waitFor(`!!document.querySelector(${JSON.stringify(selector)})`, `${name} 目标元素`)
+  const view = await visibleView()
+  await sleep(500)
+  // 用 DevTools 协议截图：它会强制产生新的一帧，拿到的总是当前渲染结果，
+  // 而 webContents.capturePage 在窗口被遮挡/节流时会返回上一帧。
+  const dbg = win.webContents.debugger
+  if (!dbg.isAttached()) dbg.attach('1.3')
+  const { data } = await dbg.sendCommand('Page.captureScreenshot', { format: 'png', fromSurface: true })
   const file = path.join(outDir, `${name}.png`)
-  fs.writeFileSync(file, image.toPNG())
-  const size = image.getSize()
-  console.log(`saved docs/screenshots/${name}.png (${size.width}x${size.height})`)
+  fs.writeFileSync(file, Buffer.from(data, 'base64'))
+  console.log(`saved docs/screenshots/${name}.png view=${JSON.stringify(view)}`)
 }
 
 async function goto(hash) {
@@ -116,7 +136,7 @@ async function runShots() {
     await goto('#/')
     await waitFor("document.querySelectorAll('.list-item').length >= 6", '首页三栏数据')
     await scrollTop()
-    await capture('home')
+    await capture('home', '.list-item')
 
     // 2. 阅读视图：正文、大纲、来源信息
     await goto('#/reader/rss/demo-rss-2')
@@ -125,12 +145,12 @@ async function runShots() {
       '阅读视图正文'
     )
     await scrollTop()
-    await capture('reader')
+    await capture('reader', '.article-title')
 
     // 3. 知识图谱：关系节点与边
     await goto('#/graph')
     await waitFor("document.querySelectorAll('.node-circle').length >= 6", '知识图谱节点')
-    await capture('graph')
+    await capture('graph', '.node-circle')
 
     // 4. 知识问答：先检查本地服务，再提问，等证据卡出现
     await goto('#/knowledge')
@@ -158,10 +178,11 @@ async function runShots() {
       const card = document.querySelector('.answer-card')
       if (!view || !card) return false
       const offset = card.getBoundingClientRect().top - view.getBoundingClientRect().top + view.scrollTop
-      view.scrollTop = Math.max(0, offset - 300)
+      view.scrollTop = Math.max(0, offset - 140)
       return true
     })()`)
-    await capture('qa')
+    await sleep(500)
+    await capture('qa', '.answer-card')
 
     // 5. 探究线：问题、证据、当前判断与下一步
     await goto('#/inquiry')
@@ -170,7 +191,7 @@ async function runShots() {
       '探究线内容'
     )
     await scrollTop()
-    await capture('inquiry')
+    await capture('inquiry', '.source-card')
 
     // 6. 设置页：四类后端与连接健康检查
     await goto('#/settings')
@@ -183,7 +204,7 @@ async function runShots() {
     })()`)
     await waitFor("document.body.innerText.includes('已连接')", '连接健康检查', 20000)
     await scrollTop()
-    await capture('settings')
+    await capture('settings', '.service-card')
 
     console.log('done')
     shutdown(0)
@@ -212,6 +233,8 @@ app.on('browser-window-created', (_event, window) => {
   win = window
   window.setSize(1440, 900)
   window.center()
+  // 截图脚本依赖窗口持续绘制，禁用背景节流避免切页后取到旧帧
+  window.webContents.setBackgroundThrottling(false)
 
   window.webContents.on('console-message', (_event, level, message) => {
     if (level >= 2) console.log(`[renderer:${level}] ${message}`)

@@ -63,11 +63,11 @@ onUnmounted(() => {
 <template>
   <PanelLayout
     title="RSS 订阅"
-    icon="📰"
+    type="rss"
     :loading="loading"
     :error="error"
     :empty="isEmpty"
-    empty-icon="📭"
+    empty-icon="inbox"
     empty-text="暂无未读文章"
     @refresh="loadItems"
     @goto-settings="router.push('/settings')"
@@ -97,9 +97,12 @@ onUnmounted(() => {
 
 <style scoped>
 .unread-count {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-right: 4px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  margin-right: 2px;
 }
 
 .cache-status {
@@ -111,12 +114,12 @@ onUnmounted(() => {
 .item-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .list-item {
-  padding: 12px;
-  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -128,32 +131,34 @@ onUnmounted(() => {
 .item-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 5px;
 }
 
 .item-source {
-  font-size: 12px;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
 }
 
 .item-date {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
 .item-title {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  line-height: 1.4;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin-bottom: 3px;
+  line-height: 1.45;
 }
 
 .item-summary {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-secondary);
   line-height: 1.5;
   display: -webkit-box;

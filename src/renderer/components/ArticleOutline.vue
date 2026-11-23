@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import AppIcon from '@/renderer/components/AppIcon.vue'
 
 const props = defineProps<{
   content: string
@@ -84,7 +85,7 @@ onUnmounted(() => {
 <template>
   <aside v-if="headings.length > 0" class="article-outline">
     <div class="outline-header">
-      <span class="outline-icon">📑</span>
+      <span class="outline-icon"><AppIcon name="list" :size="13" /></span>
       <span class="outline-title">目录</span>
     </div>
     <nav class="outline-nav">
