@@ -130,10 +130,25 @@ async function scrollTop() {
 
 async function runShots() {
   try {
-    // 单独跑开场动画：它在 760ms 后就消失，必须抢在淡出前截
-    if (process.env.KP_SHOT_SPLASH) {
-      await sleep(60)
-      await capture('splash', '.splash', 60)
+    // 单独跑开场动画：它在 1.7s 后就消失，必须抢在淡出前截。
+    // KP_SHOT_SPLASH_AT 指定相对「开场已挂载」的毫秒，用来定格某个节拍。
+    if (process.env.KP_SHOT_SPLASH || process.env.KP_SHOT_SPLASH_AT) {
+      const at = Number(process.env.KP_SHOT_SPLASH_AT ?? 60)
+      const name = process.env.KP_SHOT_SPLASH_NAME || 'splash'
+      let elapsed = 0
+      const started = Date.now()
+      while (Date.now() - started < 6000) {
+        const seen = await evaluate(`(() => {
+          if (!window.__KP_SPLASH_AT__) return null
+          if (!document.querySelector('.splash')) return null
+          return performance.now() - window.__KP_SPLASH_AT__
+        })()`)
+        if (seen !== null && seen !== undefined) { elapsed = seen; break }
+        await sleep(4)
+      }
+      const wait = Math.max(0, at - elapsed)
+      if (wait) await sleep(wait)
+      await capture(name, '.splash', 0)
       shutdown(0)
       return
     }
