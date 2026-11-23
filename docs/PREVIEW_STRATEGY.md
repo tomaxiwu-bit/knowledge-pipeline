@@ -3,20 +3,26 @@
 Knowledge Pipeline 是 Electron 桌面应用，无法像 Web 应用那样直接提供在线 Demo。
 以下方案让招聘方/客户在不安装应用的情况下，充分了解项目能力。
 
-## 方案一：截图 + 架构图（最低成本，必须做）
+## 方案一：截图 + 架构图（已完成）
 
-在 `docs/screenshots/` 目录放置以下截图，README 的「截图」段落取消注释并填入：
+`docs/screenshots/` 下的六张截图由脚本自动生成，不需要手工截屏：
+
+```powershell
+npm run screenshots
+```
+
+脚本 `scripts/screenshots/capture.cjs` 会用临时 userData 目录启动桌面端（不读写本机真实配置），在进程内起一个本地 mock 后端（`scripts/screenshots/mock-server.cjs`，端口 4787），把 `fixtures.cjs` 里的虚构数据挂到 FreshRSS、Karakeep、Memos、RAG 与 Chat Completions 接口上，然后逐页截图。
 
 | 截图 | 文件名 | 说明 |
 |------|--------|------|
 | 三栏首页 | `home.png` | RSS + 收藏 + 速记三栏布局 |
-| 阅读视图 | `reader.png` | 文章大纲 + 划重点 + AI 摘要 |
+| 阅读视图 | `reader.png` | 文章大纲 + 反向链接 |
 | 知识图谱 | `graph.png` | 力导向图 + 节点关系 |
-| 知识问答 | `qa.png` | 证据卡 + 来源引用 |
-| 探究线 | `inquiry.png` | 证据标记 + 当前判断 + 下一步 |
+| 知识问答 | `qa.png` | 答案 + 证据卡与出处 |
+| 探究线 | `inquiry.png` | 证据角色 + 当前判断 + 下一步 |
 | 设置页 | `settings.png` | 多后端管理 + 连接健康检查 |
 
-截图工具：Windows 自带 `Win+Shift+S`，或 ShareX（开源）。
+截图内容是虚构的演示数据，改 `fixtures.cjs` 后重跑即可换题材。README 的「界面」段落已引用这六张图。
 
 ## 方案二：录屏视频（强烈推荐）
 
@@ -57,7 +63,7 @@ gh release create v0.3.1 release/*.exe --title "v0.3.1" --notes-from-tag
 
 ## 优先级
 
-1. **必须**：截图 6 张 + README 取消注释
+1. **已完成**：截图 6 张（`npm run screenshots` 自动生成）+ README「界面」段落
 2. **强烈推荐**：录屏视频
 3. **推荐**：GitHub Release + 安装包附件
 4. **可选**：后端 API 云端 Demo

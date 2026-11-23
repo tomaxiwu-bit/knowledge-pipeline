@@ -38,6 +38,27 @@ flowchart LR
 
 首次启动需要连接自己的来源服务；未连接时首页会显示配置进度。连接并同步材料后，可按 [演示操作指南](docs/DEMO_SCRIPT.md) 走通阅读、检索、问答和探究线。
 
+## 界面
+
+以下截图由 `npm run screenshots` 生成。脚本用临时配置目录启动桌面端，连接本机 `127.0.0.1:4787` 上的虚构演示后端（FreshRSS、Karakeep、Memos、本机 RAG 与兼容 Chat Completions 的模型），图中的文章、收藏、笔记和问答内容全部是编造的演示数据，不包含任何真实用户资料；想改内容改 `scripts/screenshots/fixtures.cjs` 后重跑即可。
+
+<p align="center"><img src="docs/screenshots/home.png" width="880" alt="流水线首页：RSS、收藏与速记三栏" /></p>
+
+RSS、链接收藏与速记并排在一个工作台里，读、存、记三个动作不用切换应用。
+
+<p align="center"><img src="docs/screenshots/reader.png" width="880" alt="阅读视图：正文、目录与反向链接" /></p>
+
+阅读视图保留原文结构，右侧同时给出目录与反向链接：哪些笔记由这篇文章衍生、哪些收藏和它相关。
+
+<p align="center"><img src="docs/screenshots/qa.png" width="880" alt="知识问答：答案与证据卡" /></p>
+
+问答结果附带证据卡与出处，可以点回原文核对，而不是只给一段无法追溯的回答。
+
+| 知识图谱 | 探究线 | 设置与连接检查 |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/graph.png" width="270" alt="知识图谱" /> | <img src="docs/screenshots/inquiry.png" width="270" alt="探究线" /> | <img src="docs/screenshots/settings.png" width="270" alt="设置页" /> |
+| 条目之间按引用、衍生、相关连成图 | 问题、证据、当前判断与下一步放在一起 | 每类后端可配多个实例并逐个检查连接 |
+
 ## 先运行桌面端
 
 直接试用可下载 [v0.3.1 Windows 安装包](https://github.com/tomaxiwu-bit/knowledge-pipeline/releases/tag/v0.3.1)。源码运行需要 **Node.js ≥20.19 和 npm**：
