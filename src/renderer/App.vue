@@ -11,6 +11,8 @@ import { useCommandRegistry } from '@/renderer/composables/useCommandRegistry'
 import { useKeyboardShortcuts } from '@/renderer/composables/useKeyboardShortcuts'
 import SidebarNav from '@/renderer/components/SidebarNav.vue'
 import CommandPalette from '@/renderer/components/CommandPalette.vue'
+import ParticleField from '@/renderer/components/ParticleField.vue'
+import SplashScreen from '@/renderer/components/SplashScreen.vue'
 
 const settingsStore = useSettingsStore()
 const relationStore = useRelationStore()
@@ -183,6 +185,7 @@ onMounted(async () => {
 
 <template>
   <div class="app-layout">
+    <ParticleField />
     <SidebarNav />
     <main class="app-main">
       <router-view v-slot="{ Component, route }">
@@ -192,11 +195,14 @@ onMounted(async () => {
       </router-view>
     </main>
     <CommandPalette :visible="paletteVisible" @close="closePalette" />
+    <SplashScreen />
   </div>
 </template>
 
 <style scoped>
 .app-layout {
+  position: relative;
+  z-index: 1;
   display: flex;
   height: 100%;
   width: 100%;

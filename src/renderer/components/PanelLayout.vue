@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from '@/renderer/components/AppIcon.vue'
+import { useTilt } from '@/renderer/composables/useTilt'
 
 defineProps<{
   title: string
@@ -15,10 +16,18 @@ defineEmits<{
   (e: 'refresh'): void
   (e: 'goto-settings'): void
 }>()
+
+const { el: panelRef, style: tiltStyle, onMove, onLeave } = useTilt({ max: 1.6 })
 </script>
 
 <template>
-  <div class="panel">
+  <div
+    ref="panelRef"
+    class="panel"
+    :style="tiltStyle"
+    @mousemove="onMove"
+    @mouseleave="onLeave"
+  >
     <div class="panel-header">
       <h2 class="panel-title">
         <AppIcon v-if="icon" :name="icon" :size="16" class="panel-icon" />

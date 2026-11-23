@@ -98,10 +98,10 @@ async function visibleView() {
   })()`)
 }
 
-async function capture(name, selector) {
+async function capture(name, selector, delay = 500) {
   if (selector) await waitFor(`!!document.querySelector(${JSON.stringify(selector)})`, `${name} 目标元素`)
   const view = await visibleView()
-  await sleep(500)
+  await sleep(delay)
   // 用 DevTools 协议截图：它会强制产生新的一帧，拿到的总是当前渲染结果，
   // 而 webContents.capturePage 在窗口被遮挡/节流时会返回上一帧。
   const dbg = win.webContents.debugger
@@ -130,6 +130,14 @@ async function scrollTop() {
 
 async function runShots() {
   try {
+    // 单独跑开场动画：它在 760ms 后就消失，必须抢在淡出前截
+    if (process.env.KP_SHOT_SPLASH) {
+      await sleep(60)
+      await capture('splash', '.splash', 60)
+      shutdown(0)
+      return
+    }
+
     await sleep(700)
 
     // 1. 首页：RSS / 收藏 / 速记三栏

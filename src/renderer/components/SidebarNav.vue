@@ -67,7 +67,9 @@ const navItems = [
 .sidebar {
   width: 216px;
   min-width: 216px;
-  background: var(--bg-secondary);
+  background: var(--sidebar-veil);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border-color);
