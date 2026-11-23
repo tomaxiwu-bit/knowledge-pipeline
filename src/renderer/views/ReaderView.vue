@@ -484,7 +484,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 .reader-toolbar {

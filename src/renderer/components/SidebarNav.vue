@@ -87,8 +87,28 @@ const navItems = [
   place-items: center;
   border-radius: 8px;
   color: var(--accent-contrast);
-  background: linear-gradient(145deg, var(--accent), var(--accent-hover));
-  box-shadow: var(--shadow-sm);
+  background: var(--gradient-brand);
+  background-size: 150% 150%;
+  box-shadow:
+    0 0 20px -4px var(--accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.28);
+  animation: logo-breathe 5s ease-in-out infinite;
+}
+
+@keyframes logo-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 18px -6px var(--accent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 0 30px -4px var(--accent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.28);
+  }
 }
 
 .brand {
@@ -133,6 +153,7 @@ const navItems = [
   font-size: 13px;
   text-align: left;
   width: 100%;
+  transition: background 0.18s var(--ease-out-expo), color 0.18s ease, padding-left 0.18s var(--ease-out-expo);
 }
 
 .nav-item:hover {
@@ -141,7 +162,7 @@ const navItems = [
 }
 
 .nav-item.active {
-  background: var(--accent-soft);
+  background: linear-gradient(90deg, var(--accent-soft), transparent 78%);
   color: var(--accent);
   font-weight: 500;
 }
@@ -156,14 +177,12 @@ const navItems = [
   height: 18px;
   border-radius: 2px;
   background: var(--accent);
-}
-
-.nav-icon {
-  opacity: 0.9;
+  box-shadow: 0 0 10px var(--accent), 0 0 18px rgba(90, 169, 255, 0.5);
 }
 
 .nav-item.active .nav-icon {
   opacity: 1;
+  filter: drop-shadow(0 0 6px var(--accent));
 }
 
 .sidebar-footer {

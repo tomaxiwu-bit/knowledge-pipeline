@@ -61,7 +61,13 @@ defineEmits<{
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-primary);
+  /* 半透明压在全局光斑上：三栏既有分隔，又能透出一点环境光 */
+  background: var(--panel-veil);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
   overflow: hidden;
 }
 
@@ -72,6 +78,7 @@ defineEmits<{
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-color);
   gap: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent);
 }
 
 .panel-title {
@@ -85,7 +92,9 @@ defineEmits<{
 }
 
 .panel-icon {
-  color: var(--text-muted);
+  color: var(--accent);
+  opacity: 0.9;
+  filter: drop-shadow(0 0 7px var(--accent-soft));
 }
 
 .panel-actions {

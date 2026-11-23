@@ -29,16 +29,14 @@ import SetupAssistant from '@/renderer/components/SetupAssistant.vue'
   display: flex;
   min-height: 0;
   flex: 1;
-  margin-top: 20px;
+  gap: 10px;
+  padding: 10px;
+  margin-top: 10px;
 }
 
 .pipeline-panels > * {
   flex: 1;
-  border-right: 1px solid var(--border-color);
-}
-
-.pipeline-panels > *:last-child {
-  border-right: none;
+  min-width: 0;
 }
 
 @media (max-width: 900px) {

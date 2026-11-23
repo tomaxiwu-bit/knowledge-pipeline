@@ -212,26 +212,34 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background:
+    radial-gradient(60% 50% at 50% 0%, var(--mesh-a), transparent 70%),
+    rgba(6, 8, 12, 0.62);
+  backdrop-filter: blur(10px) saturate(1.1);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 12vh;
   z-index: 200;
+  animation: kp-fade-in 0.2s ease both;
 }
 
 .palette-panel {
   width: 620px;
   max-width: 90%;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow:
+    0 32px 80px -32px rgba(0, 0, 0, 0.85),
+    0 0 40px -18px var(--accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   max-height: 70vh;
+  animation: kp-pop 0.32s var(--ease-out-expo) both;
 }
 
 .palette-input-wrap {

@@ -428,7 +428,7 @@ const kinds: ServiceKind[] = ['rss', 'bookmark', 'memo', 'ai']
 .settings-view {
   height: 100%;
   overflow-y: auto;
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 .settings-container {

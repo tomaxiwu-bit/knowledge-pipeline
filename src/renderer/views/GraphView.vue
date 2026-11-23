@@ -224,8 +224,8 @@ onMounted(() => {
             :x2="graphNodes.find(n => n.id === edge.target)?.x || 0"
             :y2="graphNodes.find(n => n.id === edge.target)?.y || 0"
             :stroke="getEdgeColor(edge.kind)"
-            :stroke-width="hoveredNode && (hoveredNode.id === edge.source || hoveredNode.id === edge.target) ? 2.5 : 1.2"
-            :opacity="hoveredNode && (hoveredNode.id === edge.source || hoveredNode.id === edge.target) ? 0.9 : 0.4"
+            :stroke-width="hoveredNode && (hoveredNode.id === edge.source || hoveredNode.id === edge.target) ? 2.6 : 1.4"
+            :opacity="hoveredNode && (hoveredNode.id === edge.source || hoveredNode.id === edge.target) ? 0.95 : 0.55"
             stroke-linecap="round"
           />
         </g>
@@ -233,11 +233,12 @@ onMounted(() => {
         <!-- 节点 -->
         <g class="nodes">
           <g
-            v-for="node in graphNodes"
+            v-for="(node, i) in graphNodes"
             :key="node.id"
             :transform="`translate(${node.x}, ${node.y})`"
             class="node-group"
             :class="{ selected: selectedNode?.id === node.id, hovered: hoveredNode?.id === node.id }"
+            :style="{ '--i': i }"
             @click.stop="onNodeClick(node)"
             @dblclick.stop="onNodeDoubleClick(node)"
             @mouseenter="onNodeHover(node)"
@@ -248,6 +249,7 @@ onMounted(() => {
               :fill="getNodeColor(node.type)"
               :stroke="selectedNode?.id === node.id ? '#fff' : 'rgba(255,255,255,0.3)'"
               :stroke-width="selectedNode?.id === node.id ? 3 : 1.5"
+              :style="{ '--node-color': getNodeColor(node.type) }"
               class="node-circle"
             />
             <text
@@ -329,7 +331,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 .graph-header {
@@ -360,29 +362,46 @@ onMounted(() => {
   flex: 1;
   position: relative;
   overflow: hidden;
+  background-image:
+    radial-gradient(64% 58% at 50% 42%, var(--mesh-a), transparent 70%),
+    radial-gradient(circle at 1px 1px, var(--grid-line) 1.1px, transparent 1.1px);
+  background-size: 100% 100%, 26px 26px;
 }
 
 .graph-svg {
   width: 100%;
   height: 100%;
   cursor: grab;
+  position: relative;
+  z-index: 1;
 }
 
 .graph-svg:active {
   cursor: grabbing;
 }
 
+.edges {
+  animation: kp-fade-in 0.7s ease both;
+}
+
 .node-group {
   cursor: pointer;
-  transition: opacity 0.2s;
+  /* 只淡入，不用 transform：父级 g 的 translate 是属性，CSS transform 会把它覆盖掉 */
+  animation: kp-fade-in 0.55s ease both;
+  animation-delay: calc(var(--i, 0) * 28ms);
+}
+
+.node-circle {
+  filter: drop-shadow(0 0 9px var(--node-color));
+  transition: filter 0.22s var(--ease-out-expo);
 }
 
 .node-group.hovered .node-circle {
-  filter: brightness(1.2);
+  filter: drop-shadow(0 0 17px var(--node-color)) brightness(1.18);
 }
 
 .node-group.selected .node-circle {
-  filter: brightness(1.3) drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+  filter: drop-shadow(0 0 24px var(--node-color)) brightness(1.3);
 }
 
 .node-label {

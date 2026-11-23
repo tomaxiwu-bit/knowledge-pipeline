@@ -210,11 +210,12 @@ onUnmounted(() => {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.16s var(--ease-out-expo), box-shadow 0.2s var(--ease-out-expo);
 }
 
 .list-item:hover {
   background: var(--bg-surface-hover);
+  box-shadow: inset 2px 0 0 var(--accent), 0 0 22px -12px var(--accent);
 }
 
 .item-row {

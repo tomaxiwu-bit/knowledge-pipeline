@@ -285,7 +285,7 @@ onUnmounted(() => {
 .search-view {
   height: 100%;
   overflow: hidden;
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 .search-layout {

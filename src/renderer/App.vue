@@ -185,7 +185,11 @@ onMounted(async () => {
   <div class="app-layout">
     <SidebarNav />
     <main class="app-main">
-      <router-view />
+      <router-view v-slot="{ Component, route }">
+        <transition name="view" mode="out-in">
+          <component :is="Component" :key="route.path" />
+        </transition>
+      </router-view>
     </main>
     <CommandPalette :visible="paletteVisible" @close="closePalette" />
   </div>
@@ -199,9 +203,20 @@ onMounted(async () => {
 }
 
 .app-main {
+  position: relative;
   flex: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* 顶部一层极淡的横向光带，给深色界面一点纵深 */
+.app-main::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 240px;
+  background: radial-gradient(130% 100% at 50% -10%, var(--mesh-a), transparent 72%);
+  pointer-events: none;
 }
 </style>

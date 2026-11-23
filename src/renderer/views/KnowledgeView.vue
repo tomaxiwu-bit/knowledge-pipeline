@@ -193,7 +193,7 @@ onMounted(async () => { await settingsStore.load(); await refreshHealth() })
 </template>
 
 <style scoped>
-.knowledge-view { height: 100%; overflow-y: auto; padding: 36px; background: var(--bg-primary); }
+.knowledge-view { height: 100%; overflow-y: auto; padding: 36px; background: transparent; }
 .knowledge-header { max-width: 900px; margin: 0 auto 24px; display: flex; gap: 24px; align-items: flex-start; justify-content: space-between; }
 .eyebrow { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .13em; margin-bottom: 8px; }
 h1 { font-size: 30px; letter-spacing: -.03em; margin-bottom: 10px; }

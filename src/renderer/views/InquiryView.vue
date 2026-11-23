@@ -254,7 +254,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.inquiry-view { display: flex; height: 100%; background: var(--bg-primary); overflow: hidden; }
+.inquiry-view { display: flex; height: 100%; background: transparent; overflow: hidden; }
 .inquiry-sidebar { width: 300px; min-width: 300px; padding: 24px 18px; overflow-y: auto; border-right: 1px solid var(--border-color); background: var(--bg-secondary); }
 .sidebar-heading, .inquiry-header, .section-heading, .form-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .eyebrow { margin-bottom: 4px; color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
