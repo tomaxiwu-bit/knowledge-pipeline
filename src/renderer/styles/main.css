@@ -56,6 +56,8 @@
   --panel-veil: rgba(255, 255, 255, 0.62);
   --sidebar-veil: rgba(255, 255, 255, 0.6);
   --grid-line: rgba(15, 23, 42, 0.07);
+  --vignette: rgba(15, 23, 42, 0.07);
+  --scan-color: rgba(37, 99, 235, 0.045);
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(255, 255, 255, 0.7);
 
@@ -101,9 +103,11 @@
   --mesh-a: rgba(90, 169, 255, 0.2);
   --mesh-b: rgba(124, 140, 255, 0.11);
   --mesh-c: rgba(198, 216, 255, 0.055);
-  --panel-veil: rgba(13, 15, 19, 0.5);
+  --panel-veil: rgba(13, 15, 19, 0.63);
   --sidebar-veil: rgba(20, 24, 31, 0.52);
-  --grid-line: rgba(255, 255, 255, 0.062);
+  --grid-line: rgba(255, 255, 255, 0.05);
+  --vignette: rgba(0, 0, 0, 0.34);
+  --scan-color: rgba(90, 169, 255, 0.055);
   --glass-bg: rgba(26, 30, 38, 0.72);
   --glass-border: rgba(255, 255, 255, 0.1);
 }

@@ -12,6 +12,7 @@ import { useKeyboardShortcuts } from '@/renderer/composables/useKeyboardShortcut
 import SidebarNav from '@/renderer/components/SidebarNav.vue'
 import CommandPalette from '@/renderer/components/CommandPalette.vue'
 import ParticleField from '@/renderer/components/ParticleField.vue'
+import HudBackdrop from '@/renderer/components/HudBackdrop.vue'
 import SplashScreen from '@/renderer/components/SplashScreen.vue'
 
 const settingsStore = useSettingsStore()
@@ -185,6 +186,7 @@ onMounted(async () => {
 
 <template>
   <div class="app-layout">
+    <HudBackdrop />
     <ParticleField />
     <SidebarNav />
     <main class="app-main">
