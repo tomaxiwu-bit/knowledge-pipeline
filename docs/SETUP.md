@@ -3,7 +3,7 @@
 ### 前置条件
 
 - Node.js >= 20.19
-- Docker Desktop（推荐，用于本地知识问答服务）或 Python 3.12+
+- Docker Desktop（容器运行本地知识问答服务），或 [uv](https://docs.astral.sh/uv/getting-started/installation/) 与 Python 3.12（本机运行该服务）
 - 一个或多个已实现的自建后端（至少配一个才有内容可看）：
   - RSS：[FreshRSS](https://www.freshrss.com/)
   - 收藏：[Karakeep](https://github.com/karakeep-app/karakeep)
@@ -54,8 +54,6 @@ docker compose up --build
 不使用 Docker 时，可直接运行：
 
 ```bash
-python -m venv server/.venv
-source server/.venv/bin/activate  # Windows: server\.venv\Scripts\activate
 cd server
 uv sync --locked --group test
 uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8787

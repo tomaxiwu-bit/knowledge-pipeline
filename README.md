@@ -8,13 +8,13 @@
 
 *A desktop workspace for reading, evidence-backed questions and writing.*
 
-**[下载 Windows v0.3.1](https://github.com/tomaxiwu-bit/knowledge-pipeline/releases/tag/v0.3.1)** · [安装与服务配置](docs/SETUP.md) · [AI API 接入](docs/AI_API_SETUP.md) · [架构与接口](docs/DEVELOPMENT.md)
+**[从源码试用](#先运行桌面端)** · [安装与服务配置](docs/SETUP.md) · [AI API 接入](docs/AI_API_SETUP.md) · [v0.3.1 发布记录](https://github.com/tomaxiwu-bit/knowledge-pipeline/releases/tag/v0.3.1)
 
 [![CI](https://github.com/tomaxiwu-bit/knowledge-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/tomaxiwu-bit/knowledge-pipeline/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/tomaxiwu-bit/knowledge-pipeline)](https://github.com/tomaxiwu-bit/knowledge-pipeline/releases)
 [![Node](https://img.shields.io/badge/node-%3E%3D20.19-339933?logo=node.js&logoColor=white)](package.json)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D6?logo=windows&logoColor=white)](https://github.com/tomaxiwu-bit/knowledge-pipeline/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D6?logo=windows&logoColor=white)](docs/SETUP.md)
 
 ## 适合怎样的工作
 
@@ -61,7 +61,7 @@ RSS、链接收藏与速记并排在一个工作台里，读、存、记三个�
 
 ## 先运行桌面端
 
-直接试用可下载 [v0.3.1 Windows 安装包](https://github.com/tomaxiwu-bit/knowledge-pipeline/releases/tag/v0.3.1)。源码运行需要 **Node.js ≥20.19 和 npm**：
+目前按下方命令从源码启动，需要 **Node.js ≥20.19、npm 和 Git**。安装包构建命令见本节末尾；发布记录与可下载附件应分别确认。
 
 ```powershell
 git clone https://github.com/tomaxiwu-bit/knowledge-pipeline.git
